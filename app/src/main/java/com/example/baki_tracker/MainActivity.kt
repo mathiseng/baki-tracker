@@ -10,11 +10,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.baki_tracker.dependencyInjection.MainActivityComponent
+import com.example.baki_tracker.dependencyInjection.applicationComponent
+import com.example.baki_tracker.dependencyInjection.create
 import com.example.baki_tracker.ui.theme.BakiTrackerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val mainActivityComponent = MainActivityComponent::class.create(applicationComponent)
         setContent {
             BakiTrackerTheme {
                 // A surface container using the 'background' color from the theme
