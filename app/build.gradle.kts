@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.googleGmsGoogleServices)
 }
 
 android {
@@ -63,6 +64,9 @@ dependencies {
     implementation (libs.androidx.lifecycle.compose)
     implementation (libs.androidx.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
 
     //kotlin-inject
     ksp(libs.kotlin.inject.compiler.ksp)
