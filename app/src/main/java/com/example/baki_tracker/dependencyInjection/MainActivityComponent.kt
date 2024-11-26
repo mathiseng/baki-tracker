@@ -22,7 +22,7 @@ abstract class MainActivityComponent(@Component val parent: ApplicationComponent
 //    abstract val rootWorkoutContainer: RootWorkoutContainer
 //    abstract val rootNutritionContainer: RootNutritionContainer
 //    abstract val rootProfileContainer: RootProfileContainer
-
+//    abstract val manageWorkoutContainer: ManageWorkoutContainer
 
     //Repositories
     @get:Provides

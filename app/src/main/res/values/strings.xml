@@ -17,4 +17,9 @@
     <string name="workouts">Workouts</string>
     <string name="history">History</string>
     <string name="goals">Goals</string>
+    <string name="add_workout">Add Workout</string>
+    <string name="add_exercise">Add Exercise</string>
+    <string name="add_set">Add Set</string>
+    <string name="weight">Weight</string>
+    <string name="reps">Reps</string>
 </resources>
