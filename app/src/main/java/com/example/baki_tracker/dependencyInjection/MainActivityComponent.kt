@@ -44,6 +44,4 @@ abstract class MainActivityComponent(@Component val parent: ApplicationComponent
 
     //Dependecy Provider
     // abstract val dependencyProvider: RootDependencyProvider
-
-
 }
