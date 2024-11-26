@@ -10,6 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.baki_tracker.dependencyInjection.MainActivityComponent
 import com.example.baki_tracker.dependencyInjection.applicationComponent
 import com.example.baki_tracker.dependencyInjection.create
@@ -28,13 +31,45 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    AppNavigation()
                 }
             }
         }
     }
 }
 
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "login"
+    ) {
+    composable("login") { LoginScreen(onSuccess = {navController.navigate("home")})}
+        composable("home") { GreetingScreen() }
+    }
+}
+@Composable
+fun LoginScreen(onSuccess: () -> Unit) {
+    // Fake login logic (replace with real Firebase Authentication logic)
+    val isLoggedIn = false // Replace with your AuthViewModel state
+    if (isLoggedIn) {
+        onSuccess() // Navigate to the next screen when login is successful
+    }
+
+    // Login UI
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Text("Login Screen", style = MaterialTheme.typography.headlineMedium)
+        // Add actual UI elements for email/password login or Firebase login button
+    }
+}
+@Composable
+fun GreetingScreen() {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Greeting("Android")
+    }
+}
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
