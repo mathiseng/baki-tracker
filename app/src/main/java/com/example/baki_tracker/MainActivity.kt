@@ -14,10 +14,12 @@ import com.example.baki_tracker.dependencyInjection.MainActivityComponent
 import com.example.baki_tracker.dependencyInjection.applicationComponent
 import com.example.baki_tracker.dependencyInjection.create
 import com.example.baki_tracker.ui.theme.BakiTrackerTheme
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         val mainActivityComponent = MainActivityComponent::class.create(applicationComponent)
         setContent {
             BakiTrackerTheme {
