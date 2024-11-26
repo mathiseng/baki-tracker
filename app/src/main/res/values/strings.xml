@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Baki-Tracker</string>
+    <string name="workout">Workout</string>
+    <string name="nutrition">Nutrition</string>
+    <string name="profile">Profile</string>
+    <string name="tracking">Tracking</string>
+    <string name="exercises">Exercises</string>
+    <string name="workouts">Workouts</string>
+    <string name="history">History</string>
+    <string name="goals">Goals</string>
 </resources>

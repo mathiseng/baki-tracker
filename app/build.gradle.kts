@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
     alias(libs.plugins.googleGmsGoogleServices)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -61,17 +62,19 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation (libs.androidx.lifecycle.compose)
-    implementation (libs.androidx.viewmodel.compose)
+    implementation(libs.androidx.material3.navigation.adaptive)
+    implementation(libs.androidx.lifecycle.compose)
+    implementation(libs.androidx.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+    implementation(libs.kotlinx.serialization.json)
 
     //kotlin-inject
     ksp(libs.kotlin.inject.compiler.ksp)
     implementation(libs.kotlinInject.runtime)
-    implementation (libs.kotlin.reflect)
+    implementation(libs.kotlin.reflect)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
