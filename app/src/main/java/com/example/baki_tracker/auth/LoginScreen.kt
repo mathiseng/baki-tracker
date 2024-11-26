@@ -6,14 +6,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.baki_tracker.dependencyInjection.viewModel
 
 @Composable
-fun LoginScreen(authViewModel: () -> AuthViewModel, onSuccess: () -> Unit) {
-    val viewmodel = viewModel { authViewModel() }
-    val uiState by viewmodel.uiState.collectAsStateWithLifecycle()
+fun LoginScreen(onSuccess: () -> Unit) {
+    val viewmodel = viewModel { AuthViewModel() }
+    val uiState = viewmodel.uiState.value
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -25,10 +26,10 @@ fun LoginScreen(authViewModel: () -> AuthViewModel, onSuccess: () -> Unit) {
         onSuccess()
     }
 
-    // Your UI layout
-    Button(onClick = { launcher.launch(viewmodel.launchSignInFlow()) }) {
-        Text("Sign In")
-    }
+   LaunchedEffect(Unit) {
+       val intent = viewmodel.launchSignInFlow()
+       launcher.launch(intent)
+   }
 
     uiState.errorMessage?.let { errorMessage ->
         Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
