@@ -8,15 +8,17 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 kotlinReflect = "2.0.0"
 ksp = "1.9.21-1.0.16"
-androidx-navigationCompose = "2.8.3"
+androidx-navigationCompose = "2.8.4"
 kotlinInject = "0.7.2"
 lifecycleRuntimeKtx = "2.8.6"
 androidx-lifecycleCompose = "2.8.6"
 androidx-viewmodelCompose = "2.8.6"
 activityCompose = "1.9.3"
-composeBom = "2024.10.00"
+composeBom = "2024.11.00"
 googleGmsGoogleServices = "4.4.2"
 firebaseBom = "33.6.0"
+serialization = "1.6.3"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,12 +38,15 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3-navigation-adaptive = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 kotlin-inject-compiler-ksp = { module = "me.tatarka.inject:kotlin-inject-compiler-ksp", version.ref = "kotlinInject" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
 kotlinInject-runtime = { module = "me.tatarka.inject:kotlin-inject-runtime", version.ref = "kotlinInject" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
+
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore"}
-firebase-auth = { group = "com.google.firebase", name = "firebase-auth"}
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 
 
 [plugins]
@@ -50,4 +55,5 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 googleGmsGoogleServices = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
