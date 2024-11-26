@@ -26,7 +26,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    //just for testing the actual screen should be replaced with navigation and root screens
+                    mainActivityComponent.manageWorkoutContainer()
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.example.baki_tracker.dependencyInjection
 
+import com.example.baki_tracker.workout.manage.ManageWorkoutContainer
 import me.tatarka.inject.annotations.Component
 
 /**
@@ -7,6 +8,8 @@ import me.tatarka.inject.annotations.Component
  */
 @Component
 abstract class MainActivityComponent(@Component val parent: ApplicationComponent) {
+    //Composables
+    abstract val manageWorkoutContainer: ManageWorkoutContainer
 
 
 }

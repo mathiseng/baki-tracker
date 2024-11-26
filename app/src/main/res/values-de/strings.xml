@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_workout">Workout Hinzufügen</string>
+    <string name="add_exercise">Übung hinzufügen</string>
+    <string name="add_set">Satz Hinzufügen</string>
+    <string name="weight">Gewicht</string>
+    <string name="reps">Anzahl</string>
+</resources>
