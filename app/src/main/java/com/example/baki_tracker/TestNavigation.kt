@@ -6,7 +6,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.baki_tracker.auth.AuthViewModel
 import com.example.baki_tracker.auth.LoginScreen
-import com.example.baki_tracker.auth.SignupScreen
 
 @Composable
 fun TestNavigation(authViewModel: AuthViewModel) {
@@ -16,12 +15,8 @@ fun TestNavigation(authViewModel: AuthViewModel) {
         composable("login") {
             LoginScreen(navController, authViewModel)
         }
-        composable("signup") {
-            SignupScreen(navController, authViewModel)
-        }
         composable("home") {
             TestHomeScreen(navController, authViewModel)
         }
-
     }
 }

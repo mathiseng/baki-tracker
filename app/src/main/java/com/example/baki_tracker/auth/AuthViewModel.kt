@@ -1,91 +1,82 @@
 package com.example.baki_tracker.auth
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseAuth
+import androidx.lifecycle.viewModelScope
+import com.example.baki_tracker.repository.AuthState
+import com.example.baki_tracker.repository.IAuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class AuthViewModel : ViewModel() {
+class AuthViewModel(private val authRepository: IAuthRepository) : ViewModel() {
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val _authState: MutableStateFlow<AuthState> =
-        MutableStateFlow(AuthState.Unauthenticated)
-    val authState: StateFlow<AuthState> = _authState
+    private val _uiState = MutableStateFlow(AuthUiState.initialUiState())
+    val uiState: StateFlow<AuthUiState> = _uiState
 
     init {
-        checkAuthStatus()
+        authRepository.checkAuthStatus()
+        viewModelScope.launch {
+            authRepository.authState.collect { authState ->
+                when (authState) {
+                    is AuthState.Error -> _uiState.update {
+                        it.copy(
+                            errorMessage = authState.message, isLoading = false
+                        )
+                    }
+
+                    is AuthState.Loading -> _uiState.update {
+                        it.copy(
+                            errorMessage = "", isLoading = true
+                        )
+                    }
+
+                    else -> _uiState.update {
+                        it.copy(
+                            errorMessage = "",
+                            isAuthenticated = authState == AuthState.Authenticated,
+                            isLoading = false
+                        )
+                    }
+                }
+            }
+        }
     }
 
-    fun checkAuthStatus() {
-        if (auth.currentUser == null) {
-            _authState.update { AuthState.Unauthenticated }
+    fun authenticate(authMode: AuthMode, email: String, password: String) {
+        if (email.isBlank() || password.isBlank()) {
+            _uiState.update {
+                it.copy(errorMessage = "Email or password can't be empty")
+            }
+            return
+        }
+
+        if (authMode == AuthMode.LOGIN) {
+            authRepository.login(email, password)
         } else {
-            _authState.update { AuthState.Authenticated }
+            authRepository.signup(email, password)
         }
     }
 
-    fun login(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
-            _authState.update {
-                AuthState.Error("Email or password can't be empty")
-                return
-            }
-        }
-        _authState.update { AuthState.Loading }
-        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                _authState.update { AuthState.Authenticated }
-            } else {
-                _authState.update {
-                    AuthState.Error(
-                        task.exception?.message ?: "Something went wrong"
-                    )
-                }
-            }
-        }
+    fun changeAuthMode(mode: AuthMode) {
+        _uiState.update { it.copy(authMode = mode) }
     }
 
-    fun signup(email: String, password: String) {
-        Log.d("Testoo", email + " " + password)
-        if (email.isBlank() || password.isBlank()) {
-            _authState.update {
-                AuthState.Error("Email or password can't be empty")
-                return
-            }
-        }
-        _authState.update { AuthState.Loading }
-        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            Log.d("Testoo COMPLETE", task.toString())
+    fun changePassword(password: String) {
+        _uiState.update { it.copy(password = password) }
+    }
 
-            if (task.isSuccessful) {
-                Log.d("Testoo Success", task.exception?.message ?: "")
-
-                _authState.update { AuthState.Authenticated }
-            } else {
-                _authState.update {
-                    Log.d("Testoo ERR", task.exception?.message ?: "")
-
-                    AuthState.Error(
-                        task.exception?.message ?: "Something went wrong"
-                    )
-                }
-            }
-        }
+    fun changeEmail(email: String) {
+        _uiState.update { it.copy(email = email) }
     }
 
     fun signOut() {
-        auth.signOut()
-        _authState.update { AuthState.Unauthenticated }
+        authRepository.signOut()
     }
-}
 
-sealed class AuthState {
-    object Authenticated : AuthState()
-    object Unauthenticated : AuthState()
-    object Loading : AuthState()
-    data class Error(val message: String) : AuthState()
+    fun changePasswordVisibility() {
+        _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
+    }
 }
