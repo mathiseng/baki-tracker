@@ -3,11 +3,14 @@ package com.example.baki_tracker.nutrition
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
-import com.example.baki_tracker.navigation.destinations.NutritionTabDestinations
 import com.example.baki_tracker.navigation.NutritionNavGraph
+import com.example.baki_tracker.navigation.destinations.NutritionTabDestinations
 import com.example.components.TabBar
+import me.tatarka.inject.annotations.Inject
 
+typealias RootNutritionContainer = @Composable () -> Unit
 
+@Inject
 @Composable
 fun RootNutritionContainer() {
 

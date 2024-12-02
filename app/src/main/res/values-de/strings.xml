@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Baki-Tracker</string>
+    <string name="login">Anmelden</string>
+    <string name="signup">Registrieren</string>
+    <string name="signout">Abmelden</string>
+    <string name="create_account">Account Erstellen</string>
+    <string name="account_exists">Ich habe bereits einen Account, Login</string>
+    <string name="account_does_not_exist">Ich habe keinen Account, Registrieren</string>
+    <string name="email">Email</string>
+    <string name="password">Passwort</string>
+    <string name="email_or_password_is_empty">Email oder Passwort darf nicht leer sein</string>
+    <string name="workout">Workout</string>
+    <string name="nutrition">Ernährung</string>
+    <string name="profile">Profil</string>
+    <string name="tracking">Aufzeichnung</string>
+    <string name="exercises">Übungen</string>
+    <string name="workouts">Workouts</string>
+    <string name="history">Verlauf</string>
+    <string name="goals">Ziele</string>
+</resources>
