@@ -29,20 +29,22 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.example.baki_tracker.R
+import com.example.baki_tracker.dependencyInjection.viewModel
+import me.tatarka.inject.annotations.Inject
 
+typealias AuthScreen = @Composable () -> Unit
+
+
+@Inject
 @Composable
-fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
+fun AuthScreen(authViewModel: () -> AuthViewModel) {
     val context = LocalContext.current
+    val viewModel = viewModel { authViewModel() }
 
-    val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(uiState.isAuthenticated, uiState.errorMessage) {
-        if (uiState.isAuthenticated) {
-            navController.navigate("home")
-        }
-
+    LaunchedEffect(uiState.errorMessage) {
         if (uiState.errorMessage.isNotBlank()) {
             Toast.makeText(
                 context, uiState.errorMessage, Toast.LENGTH_SHORT
@@ -69,20 +71,20 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         //Form
         OutlinedTextField(value = uiState.email,
-            onValueChange = { authViewModel.changeEmail(it) },
+            onValueChange = { viewModel.changeEmail(it) },
             label = { Text(text = stringResource(R.string.email)) })
         Spacer(Modifier.height(8.dp))
 
         val isPasswordVisible = uiState.isPasswordVisible
         OutlinedTextField(value = uiState.password,
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            onValueChange = { authViewModel.changePassword(it) },
+            onValueChange = { viewModel.changePassword(it) },
             label = { Text(text = stringResource(R.string.password)) },
             trailingIcon = {
                 val image =
                     if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
 
-                IconButton(onClick = { authViewModel.changePasswordVisibility() }) {
+                IconButton(onClick = { viewModel.changePasswordVisibility() }) {
                     Icon(imageVector = image, null)
                 }
 
@@ -92,7 +94,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         Spacer(Modifier.height(8.dp))
         Button(
             onClick = {
-                authViewModel.authenticate(
+                viewModel.authenticate(
                     uiState.authMode, uiState.email, uiState.password
                 )
             }, enabled = !uiState.isLoading
@@ -108,8 +110,8 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         //Footer
         TextButton(onClick = {
             if (uiState.authMode == AuthMode.LOGIN) {
-                authViewModel.changeAuthMode(AuthMode.SIGNUP)
-            } else authViewModel.changeAuthMode(AuthMode.LOGIN)
+                viewModel.changeAuthMode(AuthMode.SIGNUP)
+            } else viewModel.changeAuthMode(AuthMode.LOGIN)
         }) {
             Text(text = stringResource(footer))
         }
