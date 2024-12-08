@@ -1,7 +1,7 @@
 package com.example.baki_tracker.dependencyInjection
 
-import com.example.baki_tracker.auth.AuthViewModel
 import com.example.baki_tracker.auth.AuthScreen
+import com.example.baki_tracker.auth.AuthViewModel
 import com.example.baki_tracker.nutrition.RootNutritionContainer
 import com.example.baki_tracker.profile.RootProfileContainer
 import com.example.baki_tracker.workout.RootWorkoutContainer

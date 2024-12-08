@@ -71,6 +71,10 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.storage)
+
+    //http for food search
+    implementation(libs.okhttp)
 
     //kotlin-inject
     ksp(libs.kotlin.inject.compiler.ksp)
