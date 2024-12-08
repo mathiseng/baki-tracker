@@ -17,7 +17,9 @@ activityCompose = "1.9.3"
 composeBom = "2024.11.00"
 googleGmsGoogleServices = "4.4.2"
 firebaseBom = "33.6.0"
+okhttp = "4.12.0"
 serialization = "1.6.3"
+storage = "1.4.2"
 
 
 [libraries]
@@ -48,6 +50,8 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 
 
 [plugins]

@@ -10,9 +10,10 @@ import me.tatarka.inject.annotations.Inject
 
 typealias RootNutritionContainer = @Composable () -> Unit
 
+
 @Inject
 @Composable
-fun RootNutritionContainer() {
+fun RootNutritionContainer(trackingScreen: TrackingScreen) {
 
     val navController = rememberNavController()
 
@@ -22,6 +23,6 @@ fun RootNutritionContainer() {
             navController = navController
         )
 
-        NutritionNavGraph(navController)
+        NutritionNavGraph(navController, trackingScreen)
     }
 }
