@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Baki-Tracker</string>
+    <string name="add_workout">Add Workout</string>
+    <string name="add_exercise">Add Exercise</string>
+    <string name="add_set">Add Set</string>
+    <string name="weight">Weight</string>
+    <string name="reps">Reps</string>
     <string name="login">Login</string>
     <string name="signup">Signup</string>
     <string name="signout">Sign Out</string>
