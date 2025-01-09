@@ -1,4 +1,4 @@
-package com.example.baki_tracker.workout.manage
+package com.example.baki_tracker.workout.workouts.manage
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

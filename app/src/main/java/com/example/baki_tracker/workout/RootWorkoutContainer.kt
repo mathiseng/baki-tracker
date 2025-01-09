@@ -3,6 +3,7 @@ package com.example.baki_tracker.workout
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
+import com.example.baki_tracker.dependencyInjection.WorkoutDependencyProvider
 import com.example.baki_tracker.navigation.WorkoutNavGraph
 import com.example.baki_tracker.navigation.destinations.WorkoutTabDestinations
 import com.example.components.TabBar
@@ -12,7 +13,7 @@ typealias RootWorkoutContainer = @Composable () -> Unit
 
 @Inject
 @Composable
-fun RootWorkoutContainer() {
+fun RootWorkoutContainer(workoutDependencyProvider: WorkoutDependencyProvider) {
 
     val navController = rememberNavController()
 
@@ -22,6 +23,7 @@ fun RootWorkoutContainer() {
             navController = navController
         )
 
-        WorkoutNavGraph(navController)
+        WorkoutNavGraph(navController, workoutDependencyProvider)
+
     }
 }

@@ -1,4 +1,4 @@
-package com.example.baki_tracker.workout.manage
+package com.example.baki_tracker.workout.workouts.manage
 
 import com.example.baki_tracker.model.workout.WorkoutExercise
 
