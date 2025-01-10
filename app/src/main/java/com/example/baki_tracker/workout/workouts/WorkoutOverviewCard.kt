@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -24,12 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import com.example.baki_tracker.R
 import com.example.baki_tracker.model.dummydata.DummyData
 import com.example.baki_tracker.model.workout.Workout
 
@@ -61,7 +63,7 @@ fun WorkoutOverviewCard(workout: Workout) {
 
 
                     Text(
-                        text = "${workout.exercises.size} Exercises",
+                        text = "${workout.exercises.size} ${stringResource(R.string.exercises)}",
                         fontWeight = FontWeight.Light,
                         fontSize = TextUnit(12.0F, TextUnitType.Sp),
                         textAlign = TextAlign.Center
@@ -75,7 +77,7 @@ fun WorkoutOverviewCard(workout: Workout) {
                         border = BorderStroke(0.5.dp, CardDefaults.cardColors().contentColor),
                         onClick = {},
                         label = {
-                            workout.type?.value?.let {
+                            workout.workoutType.value.let {
                                 Text(
                                     text = it,
                                     fontWeight = FontWeight.W400,
@@ -87,7 +89,7 @@ fun WorkoutOverviewCard(workout: Workout) {
                 }
 
                 Icon(
-                    imageVector = Icons.Default.Edit,
+                    imageVector = Icons.Default.MoreVert,
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.Top) // Aligns the Icon to the top of the Row
                 )

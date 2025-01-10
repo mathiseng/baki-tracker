@@ -9,20 +9,15 @@ object DummyData {
     val workout = Workout(
         uuid = "1",
         name = "Full Body Workout",
-        type = WorkoutType.Bodyweight,
+        type = WorkoutType.Bodyweight.toMap(),
         exercises = listOf(
             WorkoutExercise(
-                uuid = "1",
-                name = "Bench Press",
-                sets = listOf(
+                uuid = "1", name = "Bench Press", sets = listOf(
                     WorkoutSet(uuid = "1", reps = 10, weight = 50.0),
                     WorkoutSet(uuid = "2", reps = 8, weight = 55.0)
                 )
-            ),
-            WorkoutExercise(
-                uuid = "2",
-                name = "Squats",
-                sets = listOf(
+            ), WorkoutExercise(
+                uuid = "2", name = "Squats", sets = listOf(
                     WorkoutSet(uuid = "3", reps = 12, weight = 60.0),
                     WorkoutSet(uuid = "4", reps = 10, weight = 65.0)
                 )

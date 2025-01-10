@@ -10,10 +10,12 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.app
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -41,53 +43,61 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
 
     //For predefined Workouts
     override suspend fun getWorkouts() {
-        workoutRef?.get()?.addOnSuccessListener {
-            val workouts = mutableListOf<Workout>()
-            for (document in it) {
-                val workout = document.toObject(Workout::class.java)
-                workout.uuid = document.id
-                workouts.add(workout)
+        withContext(Dispatchers.IO) {
+            workoutRef?.get()?.addOnSuccessListener {
+                val workouts = mutableListOf<Workout>()
+                for (document in it) {
+                    val workout = document.toObject(Workout::class.java)
+                    workout.uuid = document.id
+                    workouts.add(workout)
+                }
+                _workouts.update { workouts }
             }
-            _workouts.update { workouts }
         }
     }
 
     override suspend fun getExercises() {
-        val ref = exerciseRef?.get()?.await()
-        if (ref != null) {
-            val exercises = mutableListOf<WorkoutExercise>()
-            for (document in ref) {
-                val exercise = document.toObject(WorkoutExercise::class.java)
-                exercise.uuid = document.id
-                exercises.add(exercise)
+        withContext(Dispatchers.IO) {
+            val ref = exerciseRef?.get()?.await()
+            if (ref != null) {
+                val exercises = mutableListOf<WorkoutExercise>()
+                for (document in ref) {
+                    val exercise = document.toObject(WorkoutExercise::class.java)
+                    exercise.uuid = document.id
+                    exercises.add(exercise)
+                }
+                _exercises.update { exercises }
             }
-            _exercises.update { exercises }
         }
     }
 
     override suspend fun addWorkout(workout: Workout) {
-        if (workoutRef != null) {
-            val document = workoutRef.document()
-            workout.uuid = document.id
-            document.set(workout).await()
+        withContext(Dispatchers.IO) {
+            if (workoutRef != null) {
+                val document = workoutRef.document()
+                workout.uuid = document.id
+                document.set(workout).await()
 
-            _workouts.update { it + workout }
+                _workouts.update { it + workout }
+            }
         }
     }
 
     override suspend fun editWorkout(workout: Workout) {
-        if (workoutRef != null) {
-            val document = workoutRef.document(workout.uuid)
-            document.set(workout).await()
+        withContext(Dispatchers.IO) {
+            if (workoutRef != null) {
+                val document = workoutRef.document(workout.uuid)
+                document.set(workout).await()
 
-            //update the List
-            _workouts.update { currentWorkouts ->
-                currentWorkouts.map { workoutItem ->
-                    if (workoutItem.uuid == workout.uuid) {
-                        //overwrite old workout with updated one
-                        workout
-                    } else {
-                        workoutItem
+                //update the List
+                _workouts.update { currentWorkouts ->
+                    currentWorkouts.map { workoutItem ->
+                        if (workoutItem.uuid == workout.uuid) {
+                            //overwrite old workout with updated one
+                            workout
+                        } else {
+                            workoutItem
+                        }
                     }
                 }
             }
@@ -96,27 +106,31 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
 
     //For predefined Exercises
     override suspend fun addExercise(exercise: WorkoutExercise) {
-        if (exerciseRef != null) {
-            val document = exerciseRef.document()
-            exercise.uuid = document.id
-            document.set(exercise).await()
+        withContext(Dispatchers.IO) {
+            if (exerciseRef != null) {
+                val document = exerciseRef.document()
+                exercise.uuid = document.id
+                document.set(exercise).await()
 
-            _exercises.update { it + exercise }
+                _exercises.update { it + exercise }
+            }
         }
     }
 
     override suspend fun editExercise(exercise: WorkoutExercise) {
-        if (exerciseRef != null) {
-            val document = exerciseRef.document(exercise.uuid)
-            document.set(exercise).await()
+        withContext(Dispatchers.IO) {
+            if (exerciseRef != null) {
+                val document = exerciseRef.document(exercise.uuid)
+                document.set(exercise).await()
 
-            _exercises.update { currentExercises ->
-                currentExercises.map { exerciseItem ->
-                    if (exerciseItem.uuid == exercise.uuid) {
-                        //overwrite old exercise with updated one
-                        exercise
-                    } else {
-                        exerciseItem
+                _exercises.update { currentExercises ->
+                    currentExercises.map { exerciseItem ->
+                        if (exerciseItem.uuid == exercise.uuid) {
+                            //overwrite old exercise with updated one
+                            exercise
+                        } else {
+                            exerciseItem
+                        }
                     }
                 }
             }
@@ -124,20 +138,21 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
     }
 
     override suspend fun deleteWorkout(uuid: String) {
-        workoutRef?.document(uuid)?.delete()
-            ?.addOnSuccessListener {
-                _workouts.update { it.filterNot { it.uuid == uuid } }
-                Log.d(TAG, "DocumentSnapshot successfully deleted!") }
-            ?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
+        withContext(Dispatchers.IO) {
+            workoutRef?.document(uuid)?.delete()?.addOnSuccessListener {
+                    _workouts.update { it.filterNot { it.uuid == uuid } }
+                    Log.d(TAG, "DocumentSnapshot successfully deleted!")
+                }?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
+        }
     }
 
     override suspend fun deleteExercise(uuid: String) {
-        exerciseRef?.document(uuid)?.delete()
-            ?.addOnSuccessListener {
-                _exercises.update { it.filterNot { it.uuid == uuid } }
-                Log.d(TAG, "DocumentSnapshot successfully deleted!")
-            }
-            ?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
+        withContext(Dispatchers.IO) {
+            exerciseRef?.document(uuid)?.delete()?.addOnSuccessListener {
+                    _exercises.update { it.filterNot { it.uuid == uuid } }
+                    Log.d(TAG, "DocumentSnapshot successfully deleted!")
+                }?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
+        }
     }
 
 

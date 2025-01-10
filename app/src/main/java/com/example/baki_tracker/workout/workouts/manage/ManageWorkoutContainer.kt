@@ -1,14 +1,13 @@
 package com.example.baki_tracker.workout.workouts.manage
 
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.baki_tracker.dependencyInjection.viewModel
 import me.tatarka.inject.annotations.Inject
@@ -21,14 +20,16 @@ typealias ManageWorkoutContainer = @Composable () -> Unit
 fun ManageWorkoutContainer(manageWorkoutViewModel: () -> ManageWorkoutViewModel) {
     val viewmodel = viewModel { manageWorkoutViewModel() }
     val uiState by viewmodel.uiState.collectAsStateWithLifecycle()
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(
+        confirmValueChange = {
+            SheetValue.Hidden != it
+        }, skipPartiallyExpanded = true
+    )
 
 
     ModalBottomSheet(
-        onDismissRequest = {
-            showBottomSheet = false
+        modifier = Modifier.statusBarsPadding(), onDismissRequest = {
+
         }, sheetState = sheetState
     ) {
         // Sheet content
@@ -39,7 +40,11 @@ fun ManageWorkoutContainer(manageWorkoutViewModel: () -> ManageWorkoutViewModel)
             onAddExercise = viewmodel::addExercise,
             onDeleteExercise = viewmodel::deleteExercise,
             onAddSetToExercise = viewmodel::addSetToExercise,
-            onDeleteSetFromExercise = viewmodel::deleteSetFromExercise
+            onDeleteSetFromExercise = viewmodel::deleteSetFromExercise,
+            onSaveWorkout = viewmodel::onSaveWorkout,
+            onDismiss = viewmodel::onDismiss,
+            onWorkoutNameChange = viewmodel::onWorkoutNameChange,
+            onWorkoutTypeChange = viewmodel::onWorkoutTypeChange
         )
     }
 }
