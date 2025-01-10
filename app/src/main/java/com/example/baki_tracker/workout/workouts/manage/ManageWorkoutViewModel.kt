@@ -1,11 +1,17 @@
 package com.example.baki_tracker.workout.workouts.manage
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.baki_tracker.model.workout.Workout
 import com.example.baki_tracker.model.workout.WorkoutExercise
 import com.example.baki_tracker.model.workout.WorkoutSet
+import com.example.baki_tracker.model.workout.WorkoutType
+import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
+import com.example.baki_tracker.workout.ISharedWorkoutStateRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import java.util.UUID
 
@@ -14,7 +20,10 @@ import java.util.UUID
  * and should update the uiState accordingly. It should provide the actual uiState as a stateFlow to the UI-components
  */
 @Inject
-class ManageWorkoutViewModel : ViewModel() {
+class ManageWorkoutViewModel(
+    val workoutDatabaseRepository: IWorkoutDatabaseRepository,
+    val sharedWorkoutStateRepository: ISharedWorkoutStateRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(ManageWorkoutUiState.initialUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -84,5 +93,36 @@ class ManageWorkoutViewModel : ViewModel() {
             } else exercise
         }
         _uiState.value = uiState.value.copy(exercises = updatedExercises)
+    }
+
+    fun onWorkoutNameChange(name: String) {
+        _uiState.update { it.copy(workoutName = name) }
+    }
+
+    fun onWorkoutTypeChange(type: WorkoutType) {
+        _uiState.update { it.copy(workoutType = type) }
+    }
+
+    fun onSaveWorkout() {
+        viewModelScope.launch {
+            try {
+                val workout = Workout(
+                    name = uiState.value.workoutName, exercises = uiState.value.exercises
+                )
+
+                uiState.value.workoutType?.let {
+                    workout.type = it.toMap()
+                }
+
+                workoutDatabaseRepository.addWorkout(workout)
+                onDismiss()
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    fun onDismiss() {
+        _uiState.update { ManageWorkoutUiState.initialUiState() }
+        sharedWorkoutStateRepository.dismissBottomSheet()
     }
 }

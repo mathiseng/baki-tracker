@@ -23,4 +23,11 @@
     <string name="add_set">Satz Hinzufügen</string>
     <string name="weight">Gewicht</string>
     <string name="reps">Anzahl</string>
+    <string name="workout_name">Workout Name</string>
+    <string name="save">Speichern</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="select_workout_type">Wähle Trainings Typ</string>
+
+
+
 </resources>

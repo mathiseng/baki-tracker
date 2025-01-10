@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,17 +33,15 @@ fun WorkoutsScreen(workoutsViewModel: () -> WorkoutsViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column {
-            uiState.workoutList.forEach { workout ->
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            itemsIndexed(uiState.workoutList) { index, workout ->
                 WorkoutOverviewCard(workout)
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
-        Spacer(modifier = Modifier.weight(1f))
-        Button({}) { Text("Add Workout") }
+        Button({ viewModel.onAddWorkout() }) { Text("Add Workout") }
     }
-
-
 }
