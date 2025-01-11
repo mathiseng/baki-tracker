@@ -68,7 +68,7 @@ fun ManageWorkoutScreen(
         Text(
             modifier = Modifier.padding(bottom = 16.dp),
             fontSize = 22.sp,
-            text = stringResource(R.string.add_workout)
+            text = if (uiState.isCreatingWorkout) stringResource(R.string.add_workout) else stringResource(R.string.edit_workout)
         )
 
         Column(
@@ -189,7 +189,7 @@ fun ManageWorkoutScreenPreview() {
         )
     ManageWorkoutScreen(
         uiState = ManageWorkoutUiState(
-            "", null, list
+            "", null, list, true
         ),
         onExerciseNameChange = { _, _ -> },
         onSetChange = { _, _, _, _ -> },

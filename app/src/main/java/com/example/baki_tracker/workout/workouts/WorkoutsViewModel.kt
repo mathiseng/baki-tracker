@@ -2,6 +2,7 @@ package com.example.baki_tracker.workout.workouts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.baki_tracker.model.workout.Workout
 import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
 import com.example.baki_tracker.workout.ISharedWorkoutStateRepository
 import com.example.baki_tracker.workout.WorkoutBottomSheet
@@ -33,5 +34,10 @@ class WorkoutsViewModel(
 
     fun onAddWorkout() {
         sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.ADD)
+    }
+
+    fun onEditWorkout(workout: Workout) {
+        sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.EDIT)
+        sharedWorkoutStateRepository.updateSelectedWorkout(workout)
     }
 }
