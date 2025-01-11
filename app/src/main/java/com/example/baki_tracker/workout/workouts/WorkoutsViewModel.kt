@@ -36,8 +36,8 @@ class WorkoutsViewModel(
         sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.ADD)
     }
 
-    fun onEditWorkout(workout: Workout) {
-        sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.EDIT)
+    fun onOptionsSelected(workout: Workout) {
+        sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.OPTIONS)
         sharedWorkoutStateRepository.updateSelectedWorkout(workout)
     }
 }

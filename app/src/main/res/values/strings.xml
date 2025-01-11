@@ -25,6 +25,11 @@
     <string name="workout_name">Workout Name</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
     <string name="select_workout_type">Select Workout Type</string>
     <string name="edit_workout">Edit Workout</string>
+    <string name="delete_workout">Delete Workout</string>
+    <string name="delete_workout_confirmation">Are you sure you want to delete this workout? This action cannot be undone.</string>
+
+
 </resources>

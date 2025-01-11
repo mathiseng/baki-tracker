@@ -31,7 +31,7 @@ class ManageWorkoutViewModel(
     init {
         viewModelScope.launch {
             sharedWorkoutStateRepository.selectedWorkout.collect { workout ->
-                workout?.let {
+                if (workout != null) {
                     _uiState.update {
                         it.copy(
                             workoutName = workout.name,
@@ -40,6 +40,10 @@ class ManageWorkoutViewModel(
                             isCreatingWorkout = false
                         )
                     }
+                } else {
+                    _uiState.update {
+                        ManageWorkoutUiState.initialUiState()
+                    }
                 }
             }
         }
@@ -47,7 +51,9 @@ class ManageWorkoutViewModel(
 
     fun addExercise() {
         val newExercise = WorkoutExercise(
-            uuid = UUID.randomUUID().toString(), name = "", sets = listOf() // Start with no sets
+            uuid = UUID.randomUUID().toString(),
+            name = "",
+            sets = listOf() // Start with no sets
         )
         _uiState.update { currentState ->
             currentState.copy(exercises = currentState.exercises + newExercise)

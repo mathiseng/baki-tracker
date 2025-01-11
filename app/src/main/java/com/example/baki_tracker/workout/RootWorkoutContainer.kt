@@ -35,6 +35,7 @@ fun RootWorkoutContainer(workoutDependencyProvider: WorkoutDependencyProvider) {
         when (uiState.selectedBottomSheet) {
             WorkoutBottomSheet.ADD -> workoutDependencyProvider.manageWorkoutContainer()
             WorkoutBottomSheet.EDIT -> workoutDependencyProvider.manageWorkoutContainer()
+            WorkoutBottomSheet.OPTIONS -> workoutDependencyProvider.optionsContainer()
             else -> {}
         }
     }

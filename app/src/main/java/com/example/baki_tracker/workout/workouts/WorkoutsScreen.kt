@@ -38,7 +38,7 @@ fun WorkoutsScreen(workoutsViewModel: () -> WorkoutsViewModel) {
     ) {
         LazyColumn(modifier = Modifier.weight(1f)) {
             itemsIndexed(uiState.workoutList) { index, workout ->
-                WorkoutOverviewCard(workout) { viewModel.onEditWorkout(workout) }
+                WorkoutOverviewCard(workout) { viewModel.onOptionsSelected(workout) }
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
