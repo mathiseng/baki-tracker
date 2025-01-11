@@ -1,5 +1,6 @@
 package com.example.baki_tracker.workout.workouts.manage
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -46,5 +47,10 @@ fun ManageWorkoutContainer(manageWorkoutViewModel: () -> ManageWorkoutViewModel)
             onWorkoutNameChange = viewmodel::onWorkoutNameChange,
             onWorkoutTypeChange = viewmodel::onWorkoutTypeChange
         )
+
+        //Because we disabled onDismiss to not accidently close the bottomSheet we need to handle the logic when the back button is pressed
+        BackHandler {
+            viewmodel.onDismiss()
+        }
     }
 }
