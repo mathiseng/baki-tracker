@@ -14,10 +14,11 @@ class RootWorkoutViewModel(sharedWorkoutStateRepository: ISharedWorkoutStateRepo
 
     val uiState: StateFlow<RootWorkoutUiState> = combine(
         sharedWorkoutStateRepository.selectedWorkout,
-        sharedWorkoutStateRepository.selectedBottomSheet
-    ) { workout, bottomSheet ->
+        sharedWorkoutStateRepository.selectedBottomSheet,
+        sharedWorkoutStateRepository.dialog
+    ) { workout, bottomSheet, dialog ->
 
-        RootWorkoutUiState(workout, bottomSheet)
+        RootWorkoutUiState(workout, bottomSheet, dialog)
 
     }.stateIn(
         scope = viewModelScope,

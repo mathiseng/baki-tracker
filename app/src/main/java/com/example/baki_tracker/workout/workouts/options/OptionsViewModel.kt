@@ -2,9 +2,11 @@ package com.example.baki_tracker.workout.workouts.options
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.baki_tracker.R
 import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
 import com.example.baki_tracker.workout.ISharedWorkoutStateRepository
 import com.example.baki_tracker.workout.WorkoutBottomSheet
+import com.example.baki_tracker.workout.components.DialogInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -15,8 +17,7 @@ import me.tatarka.inject.annotations.Inject
 class OptionsViewModel(
     private val sharedWorkoutStateRepository: ISharedWorkoutStateRepository,
     val workoutDatabaseRepository: IWorkoutDatabaseRepository
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OptionsUiState.initialUiState())
     val uiState: StateFlow<OptionsUiState> = _uiState
@@ -33,11 +34,20 @@ class OptionsViewModel(
         sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.EDIT)
     }
 
-    fun onDeleteClick() {
-        _uiState.update { it.copy(showDeleteDialog = true) }
+    fun onDeleteClick(uuid: String) {
+        sharedWorkoutStateRepository.updateDialog(
+            DialogInfo(
+                R.string.delete_workout,
+                R.string.delete_workout_confirmation,
+                R.string.delete,
+                R.string.cancel,
+                { onDeleteConfirmation(uuid) },
+                this::hideDeleteDialog
+            )
+        )
     }
 
-    fun onDeleteConfirmation(uuid: String) {
+    private fun onDeleteConfirmation(uuid: String) {
         viewModelScope.launch {
             try {
                 workoutDatabaseRepository.deleteWorkout(uuid)
@@ -47,13 +57,14 @@ class OptionsViewModel(
         }
     }
 
-    fun hideDeleteDialog() {
-        _uiState.update { it.copy(showDeleteDialog = false) }
+    private fun hideDeleteDialog() {
+        sharedWorkoutStateRepository.updateDialog(null)
     }
 
     fun onDismiss() {
         _uiState.update { OptionsUiState.initialUiState() }
         sharedWorkoutStateRepository.dismissBottomSheet()
         sharedWorkoutStateRepository.updateSelectedWorkout(null)
+        sharedWorkoutStateRepository.updateDialog(null)
     }
 }
