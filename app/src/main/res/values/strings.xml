@@ -26,7 +26,5 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="select_workout_type">Select Workout Type</string>
-
-
-
+    <string name="edit_workout">Edit Workout</string>
 </resources>

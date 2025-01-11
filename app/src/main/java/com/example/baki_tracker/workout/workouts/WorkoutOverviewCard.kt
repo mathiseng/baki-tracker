@@ -1,6 +1,7 @@
 package com.example.baki_tracker.workout.workouts
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,7 +37,7 @@ import com.example.baki_tracker.model.dummydata.DummyData
 import com.example.baki_tracker.model.workout.Workout
 
 @Composable
-fun WorkoutOverviewCard(workout: Workout) {
+fun WorkoutOverviewCard(workout: Workout, onEditWorkout: () -> Unit) {
 
     ElevatedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -88,10 +89,11 @@ fun WorkoutOverviewCard(workout: Workout) {
                         })
                 }
 
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
+                Icon(imageVector = Icons.Default.MoreVert,
                     contentDescription = null,
-                    modifier = Modifier.align(Alignment.Top) // Aligns the Icon to the top of the Row
+                    modifier = Modifier
+                        .align(Alignment.Top)
+                        .clickable { onEditWorkout() } // Aligns the Icon to the top of the Row
                 )
             }
         }
@@ -109,5 +111,5 @@ fun WorkoutOverviewCard(workout: Workout) {
 fun WorkoutOverviewCardPreview() {
 
 
-    WorkoutOverviewCard(DummyData.workout)
+    WorkoutOverviewCard(workout = DummyData.workout, onEditWorkout = {})
 }

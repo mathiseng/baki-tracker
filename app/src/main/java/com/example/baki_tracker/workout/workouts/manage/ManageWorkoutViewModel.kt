@@ -28,6 +28,23 @@ class ManageWorkoutViewModel(
     val uiState = _uiState.asStateFlow()
 
 
+    init {
+        viewModelScope.launch {
+            sharedWorkoutStateRepository.selectedWorkout.collect { workout ->
+                workout?.let {
+                    _uiState.update {
+                        it.copy(
+                            workoutName = workout.name,
+                            workoutType = workout.workoutType,
+                            exercises = workout.exercises,
+                            isCreatingWorkout = false
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     fun addExercise() {
         val newExercise = WorkoutExercise(
             uuid = UUID.randomUUID().toString(), name = "", sets = listOf() // Start with no sets
@@ -106,15 +123,27 @@ class ManageWorkoutViewModel(
     fun onSaveWorkout() {
         viewModelScope.launch {
             try {
-                val workout = Workout(
-                    name = uiState.value.workoutName, exercises = uiState.value.exercises
-                )
+                if (uiState.value.isCreatingWorkout) {
+                    val workout = Workout(
+                        name = uiState.value.workoutName, exercises = uiState.value.exercises
+                    )
 
-                uiState.value.workoutType?.let {
-                    workout.type = it.toMap()
+                    uiState.value.workoutType?.let {
+                        workout.type = it.toMap()
+                    }
+
+                    workoutDatabaseRepository.addWorkout(workout)
+                } else {
+                    val workout = sharedWorkoutStateRepository.selectedWorkout.value?.copy(
+                        name = uiState.value.workoutName, exercises = uiState.value.exercises
+                    )
+                    if (workout != null) {
+                        uiState.value.workoutType?.let {
+                            workout.type = it.toMap()
+                        }
+                        workoutDatabaseRepository.editWorkout(workout)
+                    }
                 }
-
-                workoutDatabaseRepository.addWorkout(workout)
                 onDismiss()
             } catch (_: Exception) {
             }
@@ -124,5 +153,6 @@ class ManageWorkoutViewModel(
     fun onDismiss() {
         _uiState.update { ManageWorkoutUiState.initialUiState() }
         sharedWorkoutStateRepository.dismissBottomSheet()
+        sharedWorkoutStateRepository.updateSelectedWorkout(null)
     }
 }

@@ -10,7 +10,8 @@ import com.example.baki_tracker.model.workout.WorkoutType
 data class ManageWorkoutUiState(
     val workoutName: String,
     val workoutType: WorkoutType?,
-    val exercises: List<WorkoutExercise>
+    val exercises: List<WorkoutExercise>,
+    val isCreatingWorkout: Boolean
 ) {
 
     /**
@@ -18,6 +19,6 @@ data class ManageWorkoutUiState(
      */
     companion object {
         fun initialUiState(): ManageWorkoutUiState =
-            ManageWorkoutUiState("", null, emptyList())
+            ManageWorkoutUiState("", null, emptyList(), true)
     }
 }
