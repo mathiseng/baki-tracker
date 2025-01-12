@@ -11,10 +11,10 @@ import kotlinx.serialization.Serializable
  * This NavGraph is used to implement type-safe navigation using the existing screens
  */
 @Composable
-fun NutritionNavGraph(navController: NavHostController, trackingScreen: @Composable () -> Unit) {
+fun NutritionNavGraph(navController: NavHostController, trackingScreen: @Composable () -> Unit, historyScreen: @Composable () -> Unit) {
     NavHost(navController = navController, startDestination = NutritionScreens.HistoryScreen) {
         composable<NutritionScreens.HistoryScreen> {
-            Text("History")
+            historyScreen()
         }
       composable<NutritionScreens.TrackingScreen> {
           trackingScreen()
