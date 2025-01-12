@@ -28,6 +28,12 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
     private val workoutRef =
         user.currentUser?.let { db.collection("users").document(it.uid).collection("workouts") }
 
+    //Path: users/{userId}/workoutTrackingSessions/
+    private val workoutTrackingRef =
+        user.currentUser?.let {
+            db.collection("users").document(it.uid).collection("workoutTrackingSessions")
+        }
+
 
     //Path: users/{userId}/exercises/
     private val exerciseRef =
@@ -39,6 +45,10 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
 
     private val _workouts: MutableStateFlow<List<Workout>> = MutableStateFlow(emptyList())
     override val workouts: StateFlow<List<Workout>> = _workouts
+
+    private val _workoutTrackingSessions: MutableStateFlow<List<WorkoutTrackingSession>> =
+        MutableStateFlow(emptyList())
+    override val workoutTrackingSessions: StateFlow<List<WorkoutTrackingSession>> = _workoutTrackingSessions
 
 
     //For predefined Workouts
@@ -140,25 +150,33 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
     override suspend fun deleteWorkout(uuid: String) {
         withContext(Dispatchers.IO) {
             workoutRef?.document(uuid)?.delete()?.addOnSuccessListener {
-                    _workouts.update { it.filterNot { it.uuid == uuid } }
-                    Log.d(TAG, "DocumentSnapshot successfully deleted!")
-                }?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
+                _workouts.update { it.filterNot { it.uuid == uuid } }
+                Log.d(TAG, "DocumentSnapshot successfully deleted!")
+            }?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
         }
     }
 
     override suspend fun deleteExercise(uuid: String) {
         withContext(Dispatchers.IO) {
             exerciseRef?.document(uuid)?.delete()?.addOnSuccessListener {
-                    _exercises.update { it.filterNot { it.uuid == uuid } }
-                    Log.d(TAG, "DocumentSnapshot successfully deleted!")
-                }?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
+                _exercises.update { it.filterNot { it.uuid == uuid } }
+                Log.d(TAG, "DocumentSnapshot successfully deleted!")
+            }?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
         }
     }
 
 
     // for Tracking Sessions
     override suspend fun addWorkoutTrackingSession(workoutTrackingSession: WorkoutTrackingSession) {
-        TODO("Not yet implemented")
+        withContext(Dispatchers.IO) {
+            if (workoutTrackingRef != null) {
+                val document = workoutTrackingRef.document()
+                workoutTrackingSession.uuid = document.id
+                document.set(workoutTrackingSession).await()
+
+                _workoutTrackingSessions.update { it + workoutTrackingSession }
+            }
+        }
     }
 
     override suspend fun deleteWorkoutTrackingSession(sessionId: String) {
@@ -179,6 +197,8 @@ interface IWorkoutDatabaseRepository {
     // StateFlow holding the list of Workouts
     // This will emit updates to the list of workouts.
     val workouts: StateFlow<List<Workout>>
+
+    val workoutTrackingSessions: StateFlow<List<WorkoutTrackingSession>>
 
     /**
      * Retrieves a list of all predefined workouts from the database.

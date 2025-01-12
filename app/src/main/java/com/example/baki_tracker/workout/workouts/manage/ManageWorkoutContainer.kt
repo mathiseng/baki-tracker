@@ -11,14 +11,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.baki_tracker.dependencyInjection.viewModel
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-typealias ManageWorkoutContainer = @Composable () -> Unit
+typealias ManageWorkoutContainer = @Composable (ManageWorkoutMode) -> Unit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Inject
 @Composable
-fun ManageWorkoutContainer(manageWorkoutViewModel: () -> ManageWorkoutViewModel) {
+fun ManageWorkoutContainer(
+    manageWorkoutViewModel: () -> ManageWorkoutViewModel,
+    @Assisted manageWorkoutMode: ManageWorkoutMode
+) {
     val viewmodel = viewModel { manageWorkoutViewModel() }
     val uiState by viewmodel.uiState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(
@@ -36,13 +40,14 @@ fun ManageWorkoutContainer(manageWorkoutViewModel: () -> ManageWorkoutViewModel)
         // Sheet content
         ManageWorkoutScreen(
             uiState = uiState,
+            manageWorkoutMode = manageWorkoutMode,
             onExerciseNameChange = viewmodel::onExerciseNameChange,
             onSetChange = viewmodel::onSetChange,
             onAddExercise = viewmodel::addExercise,
             onDeleteExercise = viewmodel::deleteExercise,
             onAddSetToExercise = viewmodel::addSetToExercise,
             onDeleteSetFromExercise = viewmodel::deleteSetFromExercise,
-            onSaveWorkout = viewmodel::onSaveWorkout,
+            onSaveWorkout = { viewmodel.onSaveWorkout(manageWorkoutMode) },
             onDismiss = viewmodel::onDismiss,
             onWorkoutNameChange = viewmodel::onWorkoutNameChange,
             onWorkoutTypeChange = viewmodel::onWorkoutTypeChange

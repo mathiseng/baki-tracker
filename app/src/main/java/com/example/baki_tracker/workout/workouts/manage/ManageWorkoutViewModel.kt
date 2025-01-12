@@ -2,9 +2,12 @@ package com.example.baki_tracker.workout.workouts.manage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.baki_tracker.model.workout.TrackedWorkoutExercise
+import com.example.baki_tracker.model.workout.TrackedWorkoutSet
 import com.example.baki_tracker.model.workout.Workout
 import com.example.baki_tracker.model.workout.WorkoutExercise
 import com.example.baki_tracker.model.workout.WorkoutSet
+import com.example.baki_tracker.model.workout.WorkoutTrackingSession
 import com.example.baki_tracker.model.workout.WorkoutType
 import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
 import com.example.baki_tracker.workout.ISharedWorkoutStateRepository
@@ -34,10 +37,10 @@ class ManageWorkoutViewModel(
                 if (workout != null) {
                     _uiState.update {
                         it.copy(
+                            workout = workout,
                             workoutName = workout.name,
                             workoutType = workout.workoutType,
                             exercises = workout.exercises,
-                            isCreatingWorkout = false
                         )
                     }
                 } else {
@@ -126,10 +129,10 @@ class ManageWorkoutViewModel(
         _uiState.update { it.copy(workoutType = type) }
     }
 
-    fun onSaveWorkout() {
+    fun onSaveWorkout(manageWorkoutMode: ManageWorkoutMode) {
         viewModelScope.launch {
             try {
-                if (uiState.value.isCreatingWorkout) {
+                if (manageWorkoutMode == ManageWorkoutMode.CREATE) {
                     val workout = Workout(
                         name = uiState.value.workoutName, exercises = uiState.value.exercises
                     )
@@ -139,7 +142,7 @@ class ManageWorkoutViewModel(
                     }
 
                     workoutDatabaseRepository.addWorkout(workout)
-                } else {
+                } else if (manageWorkoutMode == ManageWorkoutMode.EDIT) {
                     val workout = sharedWorkoutStateRepository.selectedWorkout.value?.copy(
                         name = uiState.value.workoutName, exercises = uiState.value.exercises
                     )
@@ -149,6 +152,28 @@ class ManageWorkoutViewModel(
                         }
                         workoutDatabaseRepository.editWorkout(workout)
                     }
+                } else {
+
+                    val predefinedWorkout = uiState.value.workout
+                    val uuid = predefinedWorkout?.uuid ?: ""
+                    val trackedWorkoutExercises = uiState.value.exercises.map {
+                        TrackedWorkoutExercise(
+                            exerciseId = it.uuid,
+                            name = it.name,
+                            sets = it.sets.map {
+                                TrackedWorkoutSet(
+                                    reps = it.reps,
+                                    weight = it.weight
+                                )
+                            })
+                    }
+
+                    workoutDatabaseRepository.addWorkoutTrackingSession(
+                        WorkoutTrackingSession(
+                            workoutId = uuid,
+                            trackedExercises = trackedWorkoutExercises
+                        )
+                    )
                 }
                 onDismiss()
             } catch (_: Exception) {

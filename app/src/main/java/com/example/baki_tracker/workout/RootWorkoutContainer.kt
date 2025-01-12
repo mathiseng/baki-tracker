@@ -11,6 +11,7 @@ import com.example.baki_tracker.dependencyInjection.viewModel
 import com.example.baki_tracker.navigation.WorkoutNavGraph
 import com.example.baki_tracker.navigation.destinations.WorkoutTabDestinations
 import com.example.baki_tracker.workout.components.CustomConfirmationDialog
+import com.example.baki_tracker.workout.workouts.manage.ManageWorkoutMode
 import com.example.components.TabBar
 import me.tatarka.inject.annotations.Inject
 
@@ -35,8 +36,9 @@ fun RootWorkoutContainer(workoutDependencyProvider: WorkoutDependencyProvider) {
 
     if (uiState.selectedBottomSheet != WorkoutBottomSheet.NONE) {
         when (uiState.selectedBottomSheet) {
-            WorkoutBottomSheet.ADD -> workoutDependencyProvider.manageWorkoutContainer()
-            WorkoutBottomSheet.EDIT -> workoutDependencyProvider.manageWorkoutContainer()
+            WorkoutBottomSheet.ADD -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.CREATE)
+            WorkoutBottomSheet.EDIT -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.EDIT)
+            WorkoutBottomSheet.TRACK -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.TRACK)
             WorkoutBottomSheet.OPTIONS -> workoutDependencyProvider.optionsContainer()
             else -> {}
         }
