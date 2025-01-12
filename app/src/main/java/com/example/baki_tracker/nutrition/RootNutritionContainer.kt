@@ -13,7 +13,7 @@ typealias RootNutritionContainer = @Composable () -> Unit
 
 @Inject
 @Composable
-fun RootNutritionContainer(trackingScreen: TrackingScreen) {
+fun RootNutritionContainer(trackingScreen: TrackingScreen, historyScreen: HistoryScreen) {
 
     val navController = rememberNavController()
 
@@ -23,6 +23,6 @@ fun RootNutritionContainer(trackingScreen: TrackingScreen) {
             navController = navController
         )
 
-        NutritionNavGraph(navController, trackingScreen)
+        NutritionNavGraph(navController, trackingScreen, historyScreen)
     }
 }
