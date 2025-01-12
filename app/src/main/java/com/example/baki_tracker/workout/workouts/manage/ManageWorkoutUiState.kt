@@ -1,5 +1,6 @@
 package com.example.baki_tracker.workout.workouts.manage
 
+import com.example.baki_tracker.model.workout.Workout
 import com.example.baki_tracker.model.workout.WorkoutExercise
 import com.example.baki_tracker.model.workout.WorkoutType
 
@@ -7,11 +8,10 @@ import com.example.baki_tracker.model.workout.WorkoutType
  * The uiState is the value which gets managed through the ManageWorkoutViewModel
  * the values of the ManageWorkoutUiState are used in the Compose-Ui components
  */
-data class ManageWorkoutUiState(
+data class ManageWorkoutUiState(val workout: Workout?,
     val workoutName: String,
     val workoutType: WorkoutType?,
     val exercises: List<WorkoutExercise>,
-    val isCreatingWorkout: Boolean
 ) {
 
     /**
@@ -19,6 +19,10 @@ data class ManageWorkoutUiState(
      */
     companion object {
         fun initialUiState(): ManageWorkoutUiState =
-            ManageWorkoutUiState("", null, emptyList(), true)
+            ManageWorkoutUiState(null,"", null, emptyList())
     }
+}
+
+enum class ManageWorkoutMode {
+    CREATE, EDIT, TRACK
 }

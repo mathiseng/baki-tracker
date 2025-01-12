@@ -37,7 +37,11 @@ import com.example.baki_tracker.model.dummydata.DummyData
 import com.example.baki_tracker.model.workout.Workout
 
 @Composable
-fun WorkoutOverviewCard(workout: Workout, onEditWorkout: () -> Unit) {
+fun WorkoutOverviewCard(
+    workout: Workout,
+    onOptionsSelected: () -> Unit,
+    onStartWorkout: () -> Unit
+) {
 
     ElevatedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -93,13 +97,13 @@ fun WorkoutOverviewCard(workout: Workout, onEditWorkout: () -> Unit) {
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.Top)
-                        .clickable { onEditWorkout() } // Aligns the Icon to the top of the Row
+                        .clickable { onOptionsSelected() } // Aligns the Icon to the top of the Row
                 )
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = {}, modifier = Modifier
+            onClick = { onStartWorkout() }, modifier = Modifier
                 .height(40.dp)
                 .fillMaxWidth(), shape = RectangleShape
         ) { Text("Start") }
@@ -111,5 +115,5 @@ fun WorkoutOverviewCard(workout: Workout, onEditWorkout: () -> Unit) {
 fun WorkoutOverviewCardPreview() {
 
 
-    WorkoutOverviewCard(workout = DummyData.workout, onEditWorkout = {})
+    WorkoutOverviewCard(workout = DummyData.workout, onOptionsSelected = {}, onStartWorkout = {})
 }

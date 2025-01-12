@@ -40,4 +40,9 @@ class WorkoutsViewModel(
         sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.OPTIONS)
         sharedWorkoutStateRepository.updateSelectedWorkout(workout)
     }
+
+    fun onStartWorkout(workout: Workout) {
+        sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.TRACK)
+        sharedWorkoutStateRepository.updateSelectedWorkout(workout)
+    }
 }

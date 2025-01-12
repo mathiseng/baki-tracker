@@ -31,5 +31,6 @@
     <string name="edit_workout">Workout Bearbeiten</string>
     <string name="delete_workout">Workout Löschen</string>
     <string name="delete_workout_confirmation">Bist du sicher, dass du dieses Workout löschen möchtest? Diese Atkion kann nicht rückgängig gemacht werden.</string>
-
+    <string name="track_workout">Workout Aufzeichnen</string>
+    <string name="planned">Geplant</string>
 </resources>
