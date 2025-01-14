@@ -1,4 +1,5 @@
-package com.example.baki_tracker.nutrition
+package com.example.baki_tracker.nutrition.tracking
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,12 +27,13 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun FoodHistoryCard(
+fun NutritionHistoryCard(
     carbs: Int,
     fat: Int,
     protein: Int,
     kcal: Int,
     details: List<Pair<String, Int>>) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -85,7 +87,7 @@ fun FoodHistoryCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) { Button(
-                onClick = {  }
+                onClick = { Log.d("myapp","button clicked") }
             ) {
                 Text("Show More")
             }
@@ -125,9 +127,9 @@ fun NutrientCircle(label: String, value: Int) {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewFoodHistoryCard(){
+fun PreviewNutritionHistoryCard(){
     Column {
-        FoodHistoryCard(
+        NutritionHistoryCard(
             carbs = 23,
             fat = 14,
             protein = 110,
@@ -140,7 +142,7 @@ fun PreviewFoodHistoryCard(){
         )
     }
     Column {
-        FoodHistoryCard(
+        NutritionHistoryCard(
             carbs = 23,
             fat = 14,
             protein = 110,
@@ -153,6 +155,7 @@ fun PreviewFoodHistoryCard(){
         )
     }
 }
+
 
 
 
