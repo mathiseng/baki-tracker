@@ -1,4 +1,4 @@
-package com.example.baki_tracker.nutrition
+package com.example.baki_tracker.nutrition.tracking
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
