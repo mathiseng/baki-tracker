@@ -1,6 +1,6 @@
 package com.example.baki_tracker.nutrition
 
-data class TrackingUiState(
+data class NutritionUiState(
     val searchText: String = "",
     val searchResults: List<String> = emptyList(),
     val isLoading: Boolean = false,
@@ -15,7 +15,7 @@ data class TrackingUiState(
 )
 {
    companion object {
-       fun initialUiState() = TrackingUiState("", emptyList(), false, null)
+       fun initialUiState() = NutritionUiState("", emptyList(), false, null)
    }
 }
 data class HistoryItem(
