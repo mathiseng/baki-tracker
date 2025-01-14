@@ -1,4 +1,4 @@
-package com.example.baki_tracker.nutrition
+package com.example.baki_tracker.nutrition.tracking
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,14 +15,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.baki_tracker.nutrition.NutritionViewModel
 import me.tatarka.inject.annotations.Inject
 
 typealias HistoryScreen = @Composable () -> Unit
 
 @Inject
 @Composable
-fun HistoryScreen(trackingViewModel: () -> TrackingViewModel) {
-    val viewModel = viewModel { trackingViewModel() }
+fun HistoryScreen(nutritionViewModel: () -> NutritionViewModel) {
+    val viewModel = viewModel { nutritionViewModel() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
 
@@ -43,18 +44,19 @@ fun HistoryScreen(trackingViewModel: () -> TrackingViewModel) {
         ) {
             // Today's card
             item {
-                FoodHistoryCard(
+                NutritionHistoryCard(
                     carbs = uiState.todayCarbs,
                     fat = uiState.todayFat,
                     protein = uiState.todayProtein,
                     kcal = uiState.todayCalories,
                     details = uiState.todayDetails
                 )
+              //  HistoryDetailModalBottomSheet()
             }
 
             // Previous Day's cards
             items(uiState.history) { historyItem ->
-                FoodHistoryCard(
+                NutritionHistoryCard(
                     carbs = historyItem.carbs,
                     fat = historyItem.fat,
                     protein = historyItem.protein,
