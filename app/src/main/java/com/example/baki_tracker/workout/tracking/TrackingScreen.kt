@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.baki_tracker.R
 import com.example.baki_tracker.dependencyInjection.viewModel
@@ -39,10 +41,32 @@ fun TrackingScreen(trackingViewModel: () -> TrackingViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyColumn(modifier = Modifier.weight(1f)) {
+            uiState.sessionMap.forEach { (date, sessions) ->
+                item {
+                    if (viewModel.currentDateString == date) {
+                        Text(
+                            text = stringResource(R.string.today),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Light,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    } else {
+                        Text(
+                            text = date,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Light,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+                }
 
-            itemsIndexed(uiState.sessionList) { index, session ->
-                TrackingOverviewCard(session) { }
-                Spacer(modifier = Modifier.height(16.dp))
+                itemsIndexed(sessions) { index, session ->
+                    TrackingOverviewCard(session) { }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (index == sessions.lastIndex) {
+                        Spacer(Modifier.height(16.dp))
+                    }
+                }
             }
         }
         Button({ viewModel.onTrackWorkout() }) { Text(stringResource(R.string.track_workout)) }

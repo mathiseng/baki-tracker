@@ -54,9 +54,7 @@ class ManageWorkoutViewModel(
 
     fun addExercise() {
         val newExercise = WorkoutExercise(
-            uuid = UUID.randomUUID().toString(),
-            name = "",
-            sets = listOf() // Start with no sets
+            uuid = UUID.randomUUID().toString(), name = "", sets = listOf() // Start with no sets
         )
         _uiState.update { currentState ->
             currentState.copy(exercises = currentState.exercises + newExercise)
@@ -157,13 +155,11 @@ class ManageWorkoutViewModel(
                     val predefinedWorkout = uiState.value.workout
                     val uuid = predefinedWorkout?.uuid ?: ""
                     val trackedWorkoutExercises = uiState.value.exercises.map {
-                        TrackedWorkoutExercise(
-                            exerciseId = it.uuid,
+                        TrackedWorkoutExercise(exerciseId = it.uuid,
                             name = it.name,
                             sets = it.sets.map {
                                 TrackedWorkoutSet(
-                                    reps = it.reps,
-                                    weight = it.weight
+                                    reps = it.reps, weight = it.weight
                                 )
                             })
                     }
@@ -171,6 +167,7 @@ class ManageWorkoutViewModel(
                     workoutDatabaseRepository.addWorkoutTrackingSession(
                         WorkoutTrackingSession(
                             workoutId = uuid,
+                            name = uiState.value.workoutName,
                             trackedExercises = trackedWorkoutExercises
                         )
                     )

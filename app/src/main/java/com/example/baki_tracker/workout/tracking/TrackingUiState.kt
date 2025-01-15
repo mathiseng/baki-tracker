@@ -4,7 +4,7 @@ import com.example.baki_tracker.model.workout.Workout
 import com.example.baki_tracker.model.workout.WorkoutTrackingSession
 
 data class TrackingUiState(
-    val sessionList: List<WorkoutTrackingSession> = emptyList(),
+    val sessionMap: Map<String, List<WorkoutTrackingSession>> = emptyMap(),
     val workoutList: List<Workout> = emptyList(),
     val showTrackingDialog: Boolean = false
 )

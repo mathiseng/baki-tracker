@@ -167,6 +167,22 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
 
 
     // for Tracking Sessions
+
+    //For predefined Workouts
+    override suspend fun getWorkoutTrackingSessions() {
+        withContext(Dispatchers.IO) {
+            workoutTrackingRef?.get()?.addOnSuccessListener {
+                val trackingSessions = mutableListOf<WorkoutTrackingSession>()
+                for (document in it) {
+                    val session = document.toObject(WorkoutTrackingSession::class.java)
+                    session.uuid = document.id
+                    trackingSessions.add(session)
+                }
+                _workoutTrackingSessions.update { trackingSessions }
+            }
+        }
+    }
+
     override suspend fun addWorkoutTrackingSession(workoutTrackingSession: WorkoutTrackingSession) {
         withContext(Dispatchers.IO) {
             if (workoutTrackingRef != null) {
@@ -205,6 +221,13 @@ interface IWorkoutDatabaseRepository {
      * This method performs an asynchronous fetch operation to retrieve workout data. Updates the workouts stateFlow you can observe
      */
     suspend fun getWorkouts()
+
+    /**
+     * Retrieves a list of all workouts that where tracked from the database.
+     * This method performs an asynchronous fetch operation to retrieve tracking session data. Updates the trackingSessions stateFlow you can observe
+     */
+    suspend fun getWorkoutTrackingSessions()
+
 
     /**
      * Retrieves a list of all predefined exercises from the database.
