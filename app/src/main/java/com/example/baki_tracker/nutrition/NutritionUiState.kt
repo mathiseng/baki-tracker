@@ -5,24 +5,43 @@ data class NutritionUiState(
     val searchResults: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    // food history test for now
-    val todayCarbs: Int = 0,
-    val todayFat: Int = 0,
-    val todayProtein: Int = 0,
-    val todayCalories: Int = 0,
-    val todayDetails: List<Pair<String, Int>> = emptyList(),
-    val history: List<HistoryItem> = emptyList()
+
+    val today: Day?,
+    val history: List<Day>
 )
 {
    companion object {
-       fun initialUiState() = NutritionUiState("", emptyList(), false, null)
+       fun initialUiState() = NutritionUiState(
+           "", emptyList(), false, null, null, emptyList()
+       )
    }
 }
-data class HistoryItem(
-    val date: String,
+
+
+data class FoodItem(
+   val uuid: Int,
+    val name: String,
+    val calories: Float,
+    val protein: Float,
+    val carbs: Float,
+    val fat: Float,
+    val quantity: String,
+    val micronutrients: Map<String, Float>
+)
+
+data class NutritionSummary(
     val carbs: Int,
     val fat: Int,
     val protein: Int,
-    val calories: Int,
-    val details: List<Pair<String, Int>>
+    val kcal: Int,
+    val micronutrients: Map<String, Float>,
+    val details: List<Pair<String, Int>> // Food item name and quantity
+)
+
+
+//Represents a Day of the user's nutrition history (i.e. one NutritionHistoryCard)
+data class Day(
+    val uuid: Int,
+    val date: String,
+    val food: List<FoodItem>
 )
