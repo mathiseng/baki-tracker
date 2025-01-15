@@ -32,6 +32,16 @@
     <string name="delete_workout_confirmation">Are you sure you want to delete this workout? This action cannot be undone.</string>
     <string name="track_workout">Track Workout</string>
     <string name="planned">Planned</string>
+    <string name="start">Start</string>
+    <string name="next">Next</string>
+    <string name="back">Back</string>
+    <string name="select_tracking_mode">Select Tracking Mode</string>
+    <string name="free_workout">Free Workout</string>
+    <string name="predefined_workout">Predefined Workout</string>
+    <string name="free_workout_description">Begin a flexible workout and add exercises on the fly</string>
+    <string name="predefined_workout_description">Choose a predefined workout from your list</string>
+
+
 
 
 

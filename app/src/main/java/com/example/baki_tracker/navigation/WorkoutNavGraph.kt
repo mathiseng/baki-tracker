@@ -17,7 +17,7 @@ fun WorkoutNavGraph(
 ) {
     NavHost(navController = navController, startDestination = WorkoutScreens.TrackingScreen) {
         composable<WorkoutScreens.TrackingScreen> {
-            Text("Tracking")
+            workoutDependencyProvider.trackingScreen()
         }
         composable<WorkoutScreens.WorkoutsScreen> {
             workoutDependencyProvider.workoutsScreen()
