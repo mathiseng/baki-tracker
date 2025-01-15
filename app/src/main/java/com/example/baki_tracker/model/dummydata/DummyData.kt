@@ -3,9 +3,12 @@ package com.example.baki_tracker.model.dummydata
 import com.example.baki_tracker.model.workout.Workout
 import com.example.baki_tracker.model.workout.WorkoutExercise
 import com.example.baki_tracker.model.workout.WorkoutSet
+import com.example.baki_tracker.model.workout.WorkoutTrackingSession
 import com.example.baki_tracker.model.workout.WorkoutType
 
 object DummyData {
+    val workoutTrackingSession = WorkoutTrackingSession()
+
     val workout = Workout(
         uuid = "1",
         name = "Full Body Workout",

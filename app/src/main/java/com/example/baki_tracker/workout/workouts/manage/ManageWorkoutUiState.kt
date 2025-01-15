@@ -24,5 +24,5 @@ data class ManageWorkoutUiState(val workout: Workout?,
 }
 
 enum class ManageWorkoutMode {
-    CREATE, EDIT, TRACK
+    CREATE, EDIT, TRACK, TRACK_FREE
 }

@@ -68,6 +68,7 @@ fun ManageWorkoutScreen(
             ManageWorkoutMode.CREATE -> stringResource(R.string.add_workout)
             ManageWorkoutMode.EDIT -> stringResource(R.string.edit_workout)
             ManageWorkoutMode.TRACK -> stringResource(R.string.track_workout)
+            ManageWorkoutMode.TRACK_FREE -> stringResource(R.string.track_workout)
         }
         Text(
             modifier = Modifier.padding(bottom = 16.dp), fontSize = 22.sp, text = headerText

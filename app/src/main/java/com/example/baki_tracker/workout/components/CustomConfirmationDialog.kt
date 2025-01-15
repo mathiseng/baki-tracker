@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun CustomConfirmationDialog(
@@ -25,4 +26,10 @@ fun CustomConfirmationDialog(
                 Text(dismissButtonLabel)
             }
         }, title = { Text(text = "$title ?") }, text = { Text(text = description) })
+}
+
+@Preview
+@Composable
+fun CustomConfirmationDialogPreview(){
+    CustomConfirmationDialog("Delete Exercise","Really Want to delete","Save","Cancel",{}) { }
 }

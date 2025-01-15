@@ -39,6 +39,7 @@ fun RootWorkoutContainer(workoutDependencyProvider: WorkoutDependencyProvider) {
             WorkoutBottomSheet.ADD -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.CREATE)
             WorkoutBottomSheet.EDIT -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.EDIT)
             WorkoutBottomSheet.TRACK -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.TRACK)
+            WorkoutBottomSheet.TRACK_FREE -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.TRACK_FREE)
             WorkoutBottomSheet.OPTIONS -> workoutDependencyProvider.optionsContainer()
             else -> {}
         }

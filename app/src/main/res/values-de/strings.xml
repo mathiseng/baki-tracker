@@ -33,4 +33,13 @@
     <string name="delete_workout_confirmation">Bist du sicher, dass du dieses Workout löschen möchtest? Diese Atkion kann nicht rückgängig gemacht werden.</string>
     <string name="track_workout">Workout Aufzeichnen</string>
     <string name="planned">Geplant</string>
+    <string name="start">Start</string>
+    <string name="next">Weiter</string>
+    <string name="back">Zurück</string>
+    <string name="select_tracking_mode">Wähle Erfassungs Modus</string>
+    <string name="free_workout">Freies Workout</string>
+    <string name="predefined_workout">Vordefiniertes Workout</string>
+    <string name="free_workout_description">Starte dein flexibles Workout und füge Übungen nach Belieben hinzu</string>
+    <string name="predefined_workout_description">Wähle ein vordefiniertes Workout aus deiner Liste</string>
+
 </resources>
