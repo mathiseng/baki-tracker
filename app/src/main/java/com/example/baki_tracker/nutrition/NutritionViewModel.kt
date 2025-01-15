@@ -1,8 +1,5 @@
 package com.example.baki_tracker.nutrition
 
-import android.content.Context
-import android.content.Intent
-import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.baki_tracker.repository.TrackingRepository
@@ -15,10 +12,30 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class NutritionViewModel(private val trackingRepository: TrackingRepository, private val context: Context) : ViewModel() {
+class NutritionViewModel(private val trackingRepository: TrackingRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NutritionUiState.initialUiState())
     val uiState: StateFlow<NutritionUiState> = _uiState.asStateFlow()
+
+
+    init {
+        fetchCurrentDayAndHistory()
+    }
+
+    private fun fetchCurrentDayAndHistory() {
+        viewModelScope.launch {
+            try {
+                val currentDay = trackingRepository.fetchCurrentDay()
+                val userHistory = trackingRepository.fetchHistory()
+
+                _uiState.update {
+                    currentState -> currentState.copy(today = currentDay, history = userHistory)
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = e.message) }
+            }
+        }
+    }
 
     fun updateSearchText(text: String) {
         _uiState.update { it.copy(searchText = text) }
@@ -52,10 +69,6 @@ class NutritionViewModel(private val trackingRepository: TrackingRepository, pri
                 }
             }
         }
-    }
-    fun openCamera() {
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        context.startActivity(cameraIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
 }
