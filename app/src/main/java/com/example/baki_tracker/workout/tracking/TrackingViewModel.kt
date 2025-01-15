@@ -1,10 +1,12 @@
 package com.example.baki_tracker.workout.tracking
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.baki_tracker.model.workout.Workout
+import com.example.baki_tracker.model.workout.WorkoutTrackingSession
 import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
+import com.example.baki_tracker.utils.formatTimestampToString
+import com.example.baki_tracker.utils.getCurrentDateString
 import com.example.baki_tracker.workout.ISharedWorkoutStateRepository
 import com.example.baki_tracker.workout.WorkoutBottomSheet
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +21,10 @@ class TrackingViewModel(
     val sharedWorkoutStateRepository: ISharedWorkoutStateRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(TrackingUiState(emptyList()))
+    private val _uiState = MutableStateFlow(TrackingUiState())
     val uiState: StateFlow<TrackingUiState> = _uiState
+
+    val currentDateString = getCurrentDateString()
 
     init {
         viewModelScope.launch {
@@ -28,7 +32,7 @@ class TrackingViewModel(
         }
         viewModelScope.launch {
             workoutDatabaseRepository.workoutTrackingSessions.collect { sessions ->
-                _uiState.update { it.copy(sessionList = sessions) }
+                _uiState.update { it.copy(sessionMap = groupSessionsByDate(sessions)) }
             }
         }
 
@@ -47,6 +51,11 @@ class TrackingViewModel(
 //        sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.TRACKING_OPTIONS)
 //        // sharedWorkoutStateRepository.updateSelectedWorkout(workoutTrackingSession)
 //    }
+
+    private fun groupSessionsByDate(items: List<WorkoutTrackingSession>): Map<String, List<WorkoutTrackingSession>> {
+        return items.groupBy { it.date.formatTimestampToString() }
+            .toSortedMap(compareByDescending { it })
+    }
 
     fun onTrackWorkout() {
         _uiState.update {
