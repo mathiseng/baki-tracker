@@ -76,6 +76,9 @@ class TrackingViewModel(
         sharedWorkoutStateRepository.updateSelectedWorkout(workout)
     }
 
+    fun onSelectedSessionChanged(workoutTrackingSession: WorkoutTrackingSession?) {
+        _uiState.update { it.copy(selectedSession = workoutTrackingSession) }
+    }
 
     fun onDismissDialog() {
         _uiState.update {

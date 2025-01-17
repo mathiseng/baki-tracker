@@ -15,7 +15,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.baki_tracker.R
 import com.example.baki_tracker.dependencyInjection.viewModel
 import me.tatarka.inject.annotations.Inject
 
@@ -29,6 +31,12 @@ fun WorkoutsScreen(workoutsViewModel: () -> WorkoutsViewModel) {
 
     val uiState by viewModel.uiState.collectAsState()
 
+    uiState.selectedWorkout?.let {
+        WorkoutDetailsScreen(it) {
+            viewModel.onSelectedWorkoutChanged(null)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -38,13 +46,15 @@ fun WorkoutsScreen(workoutsViewModel: () -> WorkoutsViewModel) {
     ) {
         LazyColumn(modifier = Modifier.weight(1f)) {
             itemsIndexed(uiState.workoutList) { index, workout ->
-                WorkoutOverviewCard(
-                    workout = workout,
+                WorkoutOverviewCard(workout = workout,
+                    onShowDetails = {
+                        viewModel.onSelectedWorkoutChanged(workout)
+                    },
                     onOptionsSelected = { viewModel.onOptionsSelected(workout) },
                     onStartWorkout = { viewModel.onStartWorkout(workout) })
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
-        Button({ viewModel.onAddWorkout() }) { Text("Add Workout") }
+        Button({ viewModel.onAddWorkout() }) { Text(stringResource(R.string.add_workout)) }
     }
 }

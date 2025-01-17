@@ -45,4 +45,8 @@ class WorkoutsViewModel(
         sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.TRACK)
         sharedWorkoutStateRepository.updateSelectedWorkout(workout)
     }
+
+    fun onSelectedWorkoutChanged(workout: Workout?) {
+        _uiState.update { it.copy(selectedWorkout = workout) }
+    }
 }
