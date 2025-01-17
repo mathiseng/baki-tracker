@@ -32,6 +32,7 @@ import com.example.baki_tracker.model.workout.WorkoutTrackingSession
 @Composable
 fun TrackingOverviewCard(
     session: WorkoutTrackingSession,
+    onShowDetails: () -> Unit,
     onOptionsSelected: () -> Unit,
 ) {
 
@@ -40,6 +41,7 @@ fun TrackingOverviewCard(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
+            .clickable { onShowDetails() }
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -80,5 +82,5 @@ fun TrackingOverviewCard(
 @Preview
 @Composable
 fun WorkoutOverviewCardPreview() {
-    TrackingOverviewCard(session = DummyData.workoutTrackingSession, onOptionsSelected = {})
+    TrackingOverviewCard(session = DummyData.workoutTrackingSession, onOptionsSelected = {}, onShowDetails = {})
 }

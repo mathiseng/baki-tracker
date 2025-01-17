@@ -33,6 +33,14 @@ fun TrackingScreen(trackingViewModel: () -> TrackingViewModel) {
 
     val uiState by viewModel.uiState.collectAsState()
 
+    uiState.selectedSession?.let { session ->
+        TrackingDetailsScreen(
+            session,
+            uiState.workoutList.firstOrNull { it.uuid == session.workoutId }) {
+            viewModel.onSelectedSessionChanged(null)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -61,7 +69,9 @@ fun TrackingScreen(trackingViewModel: () -> TrackingViewModel) {
                 }
 
                 itemsIndexed(sessions) { index, session ->
-                    TrackingOverviewCard(session) { viewModel.onOptionsSelected(session) }
+                    TrackingOverviewCard(session, onShowDetails = {
+                        viewModel.onSelectedSessionChanged(session)
+                    }) { viewModel.onOptionsSelected(session) }
                     Spacer(modifier = Modifier.height(16.dp))
                     if (index == sessions.lastIndex) {
                         Spacer(Modifier.height(16.dp))
