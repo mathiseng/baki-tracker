@@ -18,12 +18,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+
+typealias ScanScreen = @Composable ((String) -> Unit) -> Unit
 
 @Inject
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
-fun ScanScreen(onBarcodeScanned: (String) -> Unit) {
+fun ScanScreen(@Assisted onBarcodeScanned: (String) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalContext.current as LifecycleOwner
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -48,7 +51,9 @@ fun ScanScreen(onBarcodeScanned: (String) -> Unit) {
                 barcodeScanner.process(inputImage)
                     .addOnSuccessListener { barcodes ->
                         for (barcode in barcodes) {
-                            barcode.rawValue?.let { onBarcodeScanned(it) }
+                            barcode.rawValue?.let { scannedValue ->
+                                onBarcodeScanned(scannedValue)
+                            }
                         }
                     }
                     .addOnCompleteListener { imageProxy.close() }
