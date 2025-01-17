@@ -11,6 +11,8 @@ import com.example.baki_tracker.repository.UserProfileRepository
 import com.example.baki_tracker.repository.WorkoutDatabaseRepository
 import com.example.baki_tracker.workout.ISharedWorkoutStateRepository
 import com.example.baki_tracker.workout.SharedWorkoutStateRepository
+import com.example.baki_tracker.repository.INutritionRepository
+import com.example.baki_tracker.repository.NutritionRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -29,6 +31,7 @@ abstract class MainActivityComponent(@Component val parent: ApplicationComponent
     //Repositories
     @get:Provides
     val authRepository: IAuthRepository = AuthRepository()
+    val nutritionRepository: INutritionRepository = NutritionRepository()
 
     @get:Provides
     val workoutDatabaseRepository: IWorkoutDatabaseRepository = WorkoutDatabaseRepository()

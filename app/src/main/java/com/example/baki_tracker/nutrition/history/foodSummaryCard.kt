@@ -1,4 +1,4 @@
-package com.example.baki_tracker.nutrition.tracking
+package com.example.baki_tracker.nutrition.history
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -26,20 +26,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.baki_tracker.nutrition.Day
+import com.example.baki_tracker.nutrition.FoodItem
 
 @Composable
 fun FoodSummaryCard(
-    caloriesGoal: Int,
-    caloriesBurned: Int,
-    caloriesConsumed: Int,
-    proteinConsumed: Int,
+    day: Day,
+    calorieGoal: Int,
     proteinGoal: Int,
-    carbsConsumed: Int,
     carbsGoal: Int,
-    fatsConsumed: Int,
     fatsGoal: Int
 ) {
-
+    // Calculate consumed values from the day's food items
+    val caloriesConsumed = day.food.sumOf { (it.calories * it.quantity).toInt() }
+    val proteinConsumed = day.food.sumOf { (it.protein * it.quantity).toInt() }
+    val carbsConsumed = day.food.sumOf { (it.carbs * it.quantity).toInt() }
+    val fatsConsumed = day.food.sumOf { (it.fat * it.quantity).toInt() }
+    val caloriesBurned = 400 // Static test value
 
     Card(
         shape = MaterialTheme.shapes.medium,
@@ -81,9 +84,8 @@ fun FoodSummaryCard(
                 DonutChart(
                     caloriesConsumed = caloriesConsumed,
                     caloriesBurned = caloriesBurned,
-                    calorieGoal = caloriesGoal
+                    calorieGoal = calorieGoal
                 )
-
             }
 
             Column(
@@ -99,6 +101,7 @@ fun FoodSummaryCard(
         }
     }
 }
+
 @Composable
 fun DonutChart(
     caloriesConsumed: Int,
@@ -165,8 +168,9 @@ fun DonutChart(
 
 @Composable
 fun NutrientBar(label: String, consumed: Int, goal: Int, consumedColor: Color) {
-    val consumedRatio = (consumed.toFloat() / goal).coerceIn(0f, 1f)
-    val remainingRatio = 1f - consumedRatio
+    val consumedRatio = if (goal > 0) (consumed.toFloat() / goal).coerceIn(0f, 1f) else 0f
+    val remainingRatio = if (goal > 0) 1f - consumedRatio else 0f
+
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -182,19 +186,24 @@ fun NutrientBar(label: String, consumed: Int, goal: Int, consumedColor: Color) {
                 .height(8.dp)
         ) {
             // Consumed portion
-            Box(
-                modifier = Modifier
-                    .weight(consumedRatio)
-                    .height(8.dp)
-                    .background(consumedColor, shape = RectangleShape)
-            )
-            // Remaining portion (Red)
-            Box(
-                modifier = Modifier
-                    .weight(remainingRatio)
-                    .height(8.dp)
-                    .background(Color.LightGray, shape = RectangleShape)
-            )
+            if (consumedRatio > 0) {
+                Box(
+                    modifier = Modifier
+                        .weight(consumedRatio)
+                        .height(8.dp)
+                        .background(consumedColor, shape = RectangleShape)
+                )
+            }
+
+            // Remaining portion
+            if (remainingRatio > 0) {
+                Box(
+                    modifier = Modifier
+                        .weight(remainingRatio)
+                        .height(8.dp)
+                        .background(Color.LightGray, shape = RectangleShape)
+                )
+            }
         }
     }
 }
@@ -202,15 +211,37 @@ fun NutrientBar(label: String, consumed: Int, goal: Int, consumedColor: Color) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewFoodSummaryCard() {
+    val sampleDay = Day(
+        uuid = 1,
+        date = "2025-01-16",
+        food = listOf(
+            FoodItem(
+                uuid = 1,
+                name = "Apple",
+                calories = 0.52f,
+                protein = 0.003f,
+                carbs = 0.14f,
+                fat = 0.002f,
+                quantity = 150f
+            ),
+            FoodItem(
+                uuid = 2,
+                name = "Egg",
+                calories = 1.43f,
+                protein = 0.12f,
+                carbs = 0.01f,
+                fat = 0.1f,
+                quantity = 50f
+            )
+        )
+    )
+
     FoodSummaryCard(
-        caloriesGoal = 2000,
-        caloriesBurned = 400,
-        caloriesConsumed = 1200,
-        proteinConsumed = 60,
+        day = sampleDay,
+        calorieGoal = 2000,
         proteinGoal = 150,
-        carbsConsumed = 100,
         carbsGoal = 200,
-        fatsConsumed = 40,
         fatsGoal = 70
     )
 }
+

@@ -1,4 +1,4 @@
-package com.example.baki_tracker.nutrition.tracking
+package com.example.baki_tracker.nutrition.history
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
