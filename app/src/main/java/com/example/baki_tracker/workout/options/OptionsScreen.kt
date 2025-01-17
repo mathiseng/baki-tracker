@@ -1,7 +1,6 @@
-package com.example.baki_tracker.workout.workouts.options
+package com.example.baki_tracker.workout.options
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +13,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,36 +27,32 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.example.baki_tracker.R
-import com.example.baki_tracker.model.workout.Workout
+import com.example.baki_tracker.model.workout.WorkoutType
 
 @Composable
 fun OptionsScreen(
-    uiState: OptionsUiState,
+    elementName: String,
+    name: String,
+    exerciseNumber: Int,
+    workoutType: WorkoutType? = null,
+    date: String? = null,
     onEditClick: () -> Unit,
-    onDeleteClick: (String) -> Unit,
+    onDeleteClick: () -> Unit,
 ) {
-    if (uiState.selectedWorkout != null) {
-        Column {
-            //Header
-            OptionsHeader(uiState.selectedWorkout)
-            Spacer(Modifier.height(16.dp))
-            HorizontalDivider()
-            //Body
-            Column(Modifier.padding(horizontal = 24.dp)) {
-                OptionsItem(Icons.Outlined.Edit, stringResource(R.string.edit_workout), onEditClick)
-                OptionsItem(Icons.Outlined.Delete,
-                    stringResource(R.string.delete_workout),
-                    { onDeleteClick(uiState.selectedWorkout.uuid) })
-            }
-        }
-    } else {
-        //Loading
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(
-                modifier = Modifier.width(24.dp),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+    Column {
+        //Header
+
+        OptionsHeader(name, exerciseNumber, workoutType, date)
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        //Body
+        Column(Modifier.padding(horizontal = 24.dp)) {
+            OptionsItem(
+                Icons.Outlined.Edit, "${stringResource(R.string.edit)} $elementName", onEditClick
             )
+            OptionsItem(Icons.Outlined.Delete,
+                "${stringResource(R.string.delete)} $elementName",
+                { onDeleteClick() })
         }
     }
 }
@@ -77,29 +71,39 @@ fun OptionsItem(icon: ImageVector, label: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun OptionsHeader(workout: Workout) {
+fun OptionsHeader(
+    name: String, exerciseNumber: Int, workoutType: WorkoutType? = null, date: String?
+) {
     Column(
         Modifier
             .padding(horizontal = 24.dp)
             .fillMaxWidth()
     ) {
         Text(
-            workout.name, style = MaterialTheme.typography.labelMedium, fontSize = TextUnit(
+            name, style = MaterialTheme.typography.labelMedium, fontSize = TextUnit(
                 16f, TextUnitType.Sp
             )
         )
         Row {
-            Text(workout.workoutType.value)
-            Text("-", modifier = Modifier.padding(horizontal = 8.dp))
-            Text("${workout.exercises.size} ${stringResource(R.string.exercises)}")
+            workoutType?.let {
+                Text(it.value)
+                Text("-", modifier = Modifier.padding(horizontal = 8.dp))
+            }
+
+            Text("$exerciseNumber ${stringResource(R.string.exercises)}")
+
+            date?.let {
+                Text("-", modifier = Modifier.padding(horizontal = 8.dp))
+                Text(it)
+            }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun OptionsScreenPreview() {
-    OptionsScreen(OptionsUiState.initialUiState(), {}, {})
+    OptionsScreen("Workout", "Abs", 8, WorkoutType.Gym, "12.12.2012", {}, {})
 }
 
 @Preview

@@ -61,7 +61,7 @@ fun TrackingScreen(trackingViewModel: () -> TrackingViewModel) {
                 }
 
                 itemsIndexed(sessions) { index, session ->
-                    TrackingOverviewCard(session) { }
+                    TrackingOverviewCard(session) { viewModel.onOptionsSelected(session) }
                     Spacer(modifier = Modifier.height(16.dp))
                     if (index == sessions.lastIndex) {
                         Spacer(Modifier.height(16.dp))

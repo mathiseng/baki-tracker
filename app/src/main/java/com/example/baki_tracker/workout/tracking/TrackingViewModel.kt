@@ -47,10 +47,10 @@ class TrackingViewModel(
     }
 
 
-//    fun onOptionsSelected(workoutTrackingSession: WorkoutTrackingSession) {
-//        sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.TRACKING_OPTIONS)
-//        // sharedWorkoutStateRepository.updateSelectedWorkout(workoutTrackingSession)
-//    }
+    fun onOptionsSelected(workoutTrackingSession: WorkoutTrackingSession) {
+        sharedWorkoutStateRepository.updateSelectedWorkoutTrackingSession(workoutTrackingSession)
+        sharedWorkoutStateRepository.updateSelectedBottomSheet(WorkoutBottomSheet.OPTIONS)
+    }
 
     private fun groupSessionsByDate(items: List<WorkoutTrackingSession>): Map<String, List<WorkoutTrackingSession>> {
         return items.groupBy { it.date.formatTimestampToString() }

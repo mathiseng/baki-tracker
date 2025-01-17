@@ -29,10 +29,9 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
         user.currentUser?.let { db.collection("users").document(it.uid).collection("workouts") }
 
     //Path: users/{userId}/workoutTrackingSessions/
-    private val workoutTrackingRef =
-        user.currentUser?.let {
-            db.collection("users").document(it.uid).collection("workoutTrackingSessions")
-        }
+    private val workoutTrackingRef = user.currentUser?.let {
+        db.collection("users").document(it.uid).collection("workoutTrackingSessions")
+    }
 
 
     //Path: users/{userId}/exercises/
@@ -48,7 +47,8 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
 
     private val _workoutTrackingSessions: MutableStateFlow<List<WorkoutTrackingSession>> =
         MutableStateFlow(emptyList())
-    override val workoutTrackingSessions: StateFlow<List<WorkoutTrackingSession>> = _workoutTrackingSessions
+    override val workoutTrackingSessions: StateFlow<List<WorkoutTrackingSession>> =
+        _workoutTrackingSessions
 
 
     //For predefined Workouts
@@ -196,11 +196,33 @@ class WorkoutDatabaseRepository() : IWorkoutDatabaseRepository {
     }
 
     override suspend fun deleteWorkoutTrackingSession(sessionId: String) {
-        TODO("Not yet implemented")
+        withContext(Dispatchers.IO) {
+            workoutTrackingRef?.document(sessionId)?.delete()?.addOnSuccessListener {
+                _workoutTrackingSessions.update { it.filterNot { it.uuid == sessionId } }
+                Log.d(TAG, "DocumentSnapshot successfully deleted!")
+            }?.addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
+        }
     }
 
     override suspend fun editWorkoutTrackingSession(workoutTrackingSession: WorkoutTrackingSession) {
-        TODO("Not yet implemented")
+        withContext(Dispatchers.IO) {
+            if (workoutTrackingRef != null) {
+                val document = workoutTrackingRef.document(workoutTrackingSession.uuid)
+                document.set(workoutTrackingSession).await()
+
+                //update the List
+                _workoutTrackingSessions.update { currentSessions ->
+                    currentSessions.map { session ->
+                        if (session.uuid == workoutTrackingSession.uuid) {
+                            //overwrite old workout with updated one
+                            workoutTrackingSession
+                        } else {
+                            session
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
