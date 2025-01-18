@@ -78,7 +78,7 @@ fun TrackingDetailsScreen(
 }
 
 @Composable
-fun DetailsSection(name: String, sets: List<TrackedWorkoutSet>, plannedSets: List<WorkoutSet>) {
+fun DetailsSection(name: String, sets: List<WorkoutSet>, plannedSets: List<WorkoutSet>) {
     Column() {
         Text(modifier = Modifier.padding(0.dp), fontSize = 22.sp, text = name)
         val listState = rememberLazyListState()

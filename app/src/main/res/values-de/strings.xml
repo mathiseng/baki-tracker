@@ -30,6 +30,7 @@
     <string name="edit">Bearbeite</string>
     <string name="select_workout_type">Wähle Trainings Typ</string>
     <string name="edit_workout">Workout Bearbeiten</string>
+    <string name="edit_session">Aufzeichnung Berarbeiten</string>
     <string name="delete_workout">Workout Löschen</string>
     <string name="delete_workout_confirmation">Bist du sicher, dass du dieses Workout löschen möchtest? Diese Atkion kann nicht rückgängig gemacht werden.</string>
     <string name="delete_workout_session">Workout Aufzeichnung Löschen</string>
