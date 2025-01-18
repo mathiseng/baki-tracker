@@ -45,7 +45,7 @@ class OptionsViewModel(
 
             //EDIT_SESSION has to be implemented
             uistate.selectedWorkoutTrackingSession != null -> sharedWorkoutStateRepository.updateSelectedBottomSheet(
-                WorkoutBottomSheet.EDIT
+                WorkoutBottomSheet.EDIT_TRACK
             )
 
         }

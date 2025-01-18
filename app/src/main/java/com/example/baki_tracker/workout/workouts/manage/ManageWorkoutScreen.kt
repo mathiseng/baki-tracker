@@ -67,6 +67,7 @@ fun ManageWorkoutScreen(
         val headerText = when (manageWorkoutMode) {
             ManageWorkoutMode.CREATE -> stringResource(R.string.add_workout)
             ManageWorkoutMode.EDIT -> stringResource(R.string.edit_workout)
+            ManageWorkoutMode.EDIT_TRACK -> stringResource(R.string.edit_session)
             ManageWorkoutMode.TRACK -> stringResource(R.string.track_workout)
             ManageWorkoutMode.TRACK_FREE -> stringResource(R.string.track_workout)
         }
@@ -84,6 +85,7 @@ fun ManageWorkoutScreen(
                 if (manageWorkoutMode != ManageWorkoutMode.TRACK) {
                     WorkoutEditorScreen(
                         uiState = uiState,
+                        showWorkoutSelection = manageWorkoutMode != ManageWorkoutMode.EDIT_TRACK,
                         onWorkoutNameChange = onWorkoutNameChange,
                         onWorkoutTypeChange = onWorkoutTypeChange,
                         onAddSetToExercise = onAddSetToExercise,
@@ -130,6 +132,7 @@ fun ManageWorkoutScreen(
 @Composable
 private fun WorkoutEditorScreen(
     uiState: ManageWorkoutUiState,
+    showWorkoutSelection: Boolean = true,
     onWorkoutNameChange: (String) -> Unit,
     onWorkoutTypeChange: (WorkoutType) -> Unit,
     onAddSetToExercise: (String) -> Unit,
@@ -150,7 +153,8 @@ private fun WorkoutEditorScreen(
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(4.dp))
-        WorkoutDropDownMenu(
+
+        if (showWorkoutSelection) WorkoutDropDownMenu(
             workoutType = uiState.workoutType, onWorkoutTypeChange = onWorkoutTypeChange
         )
 
@@ -224,7 +228,9 @@ private fun TrackingScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WorkoutDropDownMenu(workoutType: WorkoutType?, onWorkoutTypeChange: (WorkoutType) -> Unit) {
+private fun WorkoutDropDownMenu(
+    workoutType: WorkoutType?, onWorkoutTypeChange: (WorkoutType) -> Unit
+) {
     var isDropdownExpanded by remember { mutableStateOf(false) }
     Column {
         ExposedDropdownMenuBox(
@@ -277,9 +283,8 @@ fun ManageWorkoutScreenPreview() {
         WorkoutSet(UUID.randomUUID().toString(), 14, 23.4)
     )
     val list = listOf(
-        WorkoutExercise(UUID.randomUUID().toString(), "Bankdrücken", sets),
-
-        )
+        WorkoutExerciseUi(UUID.randomUUID().toString(), "Bankdrücken", sets),
+    )
     ManageWorkoutScreen(
         uiState = ManageWorkoutUiState(
             null, "", null, list

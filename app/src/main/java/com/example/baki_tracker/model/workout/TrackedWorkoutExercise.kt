@@ -6,5 +6,5 @@ data class TrackedWorkoutExercise(
     var uuid: String = UUID.randomUUID().toString(),
     var exerciseId: String = "",
     var name: String = "",
-    var sets: List<TrackedWorkoutSet> = emptyList()
+    var sets: List<WorkoutSet> = emptyList()
 )

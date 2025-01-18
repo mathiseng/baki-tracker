@@ -61,5 +61,5 @@ interface ISharedWorkoutStateRepository {
 }
 
 enum class WorkoutBottomSheet {
-    NONE, ADD, EDIT, TRACK, TRACK_FREE, OPTIONS, TRACKING_OPTIONS
+    NONE, ADD, EDIT, TRACK, TRACK_FREE, OPTIONS, TRACKING_OPTIONS, EDIT_TRACK
 }
