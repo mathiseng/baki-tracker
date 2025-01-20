@@ -1,9 +1,12 @@
 package com.example.baki_tracker.repository
 
 import com.example.baki_tracker.dependencyInjection.Singleton
-import com.example.baki_tracker.nutrition.Day
-import com.example.baki_tracker.nutrition.FoodItem
+import com.example.baki_tracker.model.nutrition.FoodItem
+import com.example.baki_tracker.model.nutrition.NutritionTrackingDay
+import com.example.baki_tracker.utils.formatTimestampToString
+import com.example.baki_tracker.utils.getCurrentDateString
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.app
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
@@ -17,9 +20,6 @@ import me.tatarka.inject.annotations.Inject
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
@@ -38,9 +38,9 @@ class NutritionRepository : INutritionRepository {
     private val _nutritionState = MutableStateFlow<NutritionState>(NutritionState.Idle)
     override val nutritionState: Flow<NutritionState> = _nutritionState.asStateFlow()
 
-    override suspend fun fetchCurrentDay(): Day {
+    override suspend fun fetchCurrentDay(): NutritionTrackingDay {
         val userId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
-        val currentDate = getCurrentDate()
+        val currentDate = getCurrentDateString()
 
         val snapshot = firestore.collection("users")
             .document(userId)
@@ -49,11 +49,11 @@ class NutritionRepository : INutritionRepository {
             .get()
             .await()
 
-        return snapshot.toObject(Day::class.java)
-            ?: Day(uuid = 0, date = currentDate, food = emptyList())
+        return snapshot.toObject(NutritionTrackingDay::class.java)
+            ?: NutritionTrackingDay(date = Timestamp.now(), food = emptyList())
     }
 
-    override suspend fun fetchHistory(): List<Day> {
+    override suspend fun fetchHistory(): List<NutritionTrackingDay> {
         val userId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
 
         val snapshot = firestore.collection("users")
@@ -63,12 +63,7 @@ class NutritionRepository : INutritionRepository {
             .get()
             .await()
 
-        return snapshot.toObjects(Day::class.java)
-    }
-
-     private fun getCurrentDate(): String {
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return formatter.format(Date())
+        return snapshot.toObjects(NutritionTrackingDay::class.java)
     }
 
     override fun fetchProductByBarcode(barcode: String, onSuccess: (FoodItem) -> Unit, onError: (Exception) -> Unit) {
@@ -87,7 +82,7 @@ class NutritionRepository : INutritionRepository {
                     val product = jsonResponse.optJSONObject("product")
                     if (product != null) {
                         val foodItem = FoodItem(
-                            uuid = product.optInt("_id", 0),
+                            uuid = product.optInt("_id", 0).toString(),
                             name = product.optString("product_name", "Unknown Product"),
                             calories = product.optJSONObject("nutriments")?.optDouble("energy-kcal_100g", 0.0)?.toFloat()?.div(100) ?: 0f,
                             protein = product.optJSONObject("nutriments")?.optDouble("proteins_100g", 0.0)?.toFloat()?.div(100) ?: 0f,
@@ -151,7 +146,7 @@ class NutritionRepository : INutritionRepository {
 
                         results.add(
                             FoodItem(
-                                uuid = i,
+                                uuid = "$i",
                                 name = productName,
                                 calories = productCalories,
                                 protein = productProtein,
@@ -179,26 +174,26 @@ class NutritionRepository : INutritionRepository {
         }
 
         val userId = currentUser.uid
-        val currentDate = getCurrentDate()
+        val currentDate = Timestamp.now()
 
         val dayRef = firestore.collection("users")
             .document(userId)
             .collection("days")
-            .document(currentDate)
+            .document(currentDate.formatTimestampToString())
 
         firestore.runTransaction { transaction ->
             val snapshot = transaction.get(dayRef)
-            val currentDay = if (snapshot.exists()) {
-                snapshot.toObject(Day::class.java) ?: Day(uuid = 0, date = currentDate, food = emptyList())
+            val currentNutritionTrackingDay = if (snapshot.exists()) {
+                snapshot.toObject(NutritionTrackingDay::class.java) ?: NutritionTrackingDay(date = currentDate, food = emptyList())
             } else {
-                Day(uuid = 0, date = currentDate, food = emptyList())
+                NutritionTrackingDay(date = currentDate, food = emptyList())
             }
 
-            val updatedFoodList = currentDay.food.toMutableList().apply {
+            val updatedFoodList = currentNutritionTrackingDay.food.toMutableList().apply {
                 add(foodItem)
             }
 
-            val updatedDay = currentDay.copy(food = updatedFoodList)
+            val updatedDay = currentNutritionTrackingDay.copy(food = updatedFoodList)
             transaction.set(dayRef, updatedDay)
         }.addOnSuccessListener {
             onSuccess()
@@ -207,7 +202,7 @@ class NutritionRepository : INutritionRepository {
         }
     }
     override fun observeUserHistory(
-        onUpdate: (List<Day>) -> Unit,
+        onUpdate: (List<NutritionTrackingDay>) -> Unit,
         onError: (Exception) -> Unit
     ) {
         val currentUser = auth.currentUser
@@ -228,7 +223,7 @@ class NutritionRepository : INutritionRepository {
                 }
 
                 if (snapshot != null) {
-                    val days = snapshot.toObjects(Day::class.java)
+                    val days = snapshot.toObjects(NutritionTrackingDay::class.java)
                     onUpdate(days)
                 }
             }
@@ -242,11 +237,11 @@ interface INutritionRepository {
     fun searchFood(query: String)
     fun saveFoodItemToDay(foodItem: FoodItem, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
     fun observeUserHistory(
-        onUpdate: (List<Day>) -> Unit,
+        onUpdate: (List<NutritionTrackingDay>) -> Unit,
         onError: (Exception) -> Unit
     )
-    suspend fun fetchCurrentDay(): Day
-    suspend fun fetchHistory(): List<Day>
+    suspend fun fetchCurrentDay(): NutritionTrackingDay
+    suspend fun fetchHistory(): List<NutritionTrackingDay>
     fun fetchProductByBarcode(barcode: String, onSuccess: (FoodItem) -> Unit, onError: (Exception) -> Unit)
 
 }

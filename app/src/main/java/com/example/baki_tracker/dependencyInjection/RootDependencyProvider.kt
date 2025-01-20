@@ -12,13 +12,9 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class RootDependencyProvider(
     val authViewModel: () -> AuthViewModel,
-
     val authScreen: AuthScreen,
     val rootWorkoutContainer: RootWorkoutContainer,
     val rootNutritionContainer: RootNutritionContainer,
     val rootProfileContainer: RootProfileContainer,
 )
- {
-
-}
 

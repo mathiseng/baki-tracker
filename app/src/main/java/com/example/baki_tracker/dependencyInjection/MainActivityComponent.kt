@@ -31,6 +31,8 @@ abstract class MainActivityComponent(@Component val parent: ApplicationComponent
     //Repositories
     @get:Provides
     val authRepository: IAuthRepository = AuthRepository()
+
+    @get:Provides
     val nutritionRepository: INutritionRepository = NutritionRepository()
 
     @get:Provides
