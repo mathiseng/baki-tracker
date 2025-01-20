@@ -2,6 +2,7 @@ package com.example.baki_tracker.nutrition
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.baki_tracker.model.nutrition.FoodItem
 import com.example.baki_tracker.repository.INutritionRepository
 import com.example.baki_tracker.repository.NutritionState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,7 +59,7 @@ class NutritionViewModel(private val nutritionRepository: INutritionRepository) 
     }
 
 
-    private fun updateSearchResults(foodItems: List<FoodItem>) {
+     fun updateSearchResults(foodItems: List<FoodItem>) {
         _uiState.update { currentState ->
             currentState.copy(searchResults = foodItems, isLoading = false, errorMessage = null)
         }
@@ -70,7 +71,7 @@ class NutritionViewModel(private val nutritionRepository: INutritionRepository) 
         nutritionRepository.saveFoodItemToDay(
             foodItem = foodItem,
             onSuccess = {
-                _uiState.update { it.copy(isLoading = false, errorMessage = null) }
+                _uiState.update { it.copy(isLoading = false, errorMessage = null, selectedFoodItem = null)}
             },
             onFailure = { exception ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = exception.message) }

@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun FoodItemCard(
@@ -23,7 +23,6 @@ fun FoodItemCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(),
         elevation = CardDefaults.cardElevation(4.dp)
@@ -31,12 +30,12 @@ fun FoodItemCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = name,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.W500
             )
             Text(
                 text = "$quantity - $calories",
-                fontSize = 14.sp
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
     }
