@@ -47,7 +47,6 @@ fun HistoryScreen(nutritionViewModel: () -> NutritionViewModel) {
 
         // Show summary card for today's data if available
         uiState.today?.let { today ->
-            if (today.food.isNotEmpty()) {
                 FoodSummaryCard(
                     nutritionTrackingDay = today,
                     calorieGoal = 2000, // Replace with dynamic goal if available
@@ -55,13 +54,6 @@ fun HistoryScreen(nutritionViewModel: () -> NutritionViewModel) {
                     carbsGoal = 200,
                     fatsGoal = 70
                 )
-            } else {
-                Text(
-                    text = "No data for today",
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.outline,
-                )
-            }
         } ?: run {
             Text(
                 text = "Loading...",

@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.baki_tracker.model.nutrition.FoodItem
 import com.example.baki_tracker.repository.INutritionRepository
-import com.example.baki_tracker.repository.NutritionState
+import com.example.baki_tracker.repository.NutritionRequestState
+import com.example.baki_tracker.utils.formatTimestampToString
+import com.example.baki_tracker.utils.getCurrentDateString
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,36 +22,60 @@ class NutritionViewModel(private val nutritionRepository: INutritionRepository) 
 
 
     init {
-        fetchCurrentDayAndHistory()
-        observeHistory()
-    }
+        //fetchCurrentDayAndHistory()
+        viewModelScope.launch {
+            nutritionRepository.getNutritionTrackingDays()
+        }
 
-    private fun observeHistory() {
-        nutritionRepository.observeUserHistory(
-            onUpdate = { days ->
-                _uiState.update { currentState ->
-                    currentState.copy(history = days)
-                }
-            },
-            onError = { exception ->
-                _uiState.update { currentState ->
-                    currentState.copy(errorMessage = exception.message)
+        viewModelScope.launch {
+            nutritionRepository.nutritionRequestState.collect { requestState ->
+                when (requestState) {
+                    is NutritionRequestState.Error -> _uiState.update {
+                        it.copy(
+                            errorMessage = requestState.message, isLoading = false
+                        )
+                    }
+
+                    is NutritionRequestState.Results -> _uiState.update {
+                        it.copy(
+                            searchResults = requestState.results,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
+
+                    is NutritionRequestState.SingleResult -> _uiState.update {
+                        it.copy(
+                            showBarcodeScanner = false,
+                            selectedFoodItem = requestState.foodItem,
+                            isLoading = false,
+                            errorMessage = null,
+                        )
+                    }
+
+                    is NutritionRequestState.Loading -> _uiState.update {
+                        it.copy(
+                            isLoading = true, errorMessage = null
+                        )
+                    }
+
+                    is NutritionRequestState.Idle -> {}
                 }
             }
-        )
-    }
+        }
 
-    private fun fetchCurrentDayAndHistory() {
         viewModelScope.launch {
-            try {
-                val currentDay = nutritionRepository.fetchCurrentDay()
-                val userHistory = nutritionRepository.fetchHistory()
+            nutritionRepository.nutritionTrackingDays.collect { trackingDays ->
+                val currentDay = getCurrentDateString()
 
                 _uiState.update {
-                    currentState -> currentState.copy(today = currentDay, history = userHistory)
+                    it.copy(
+                        history = trackingDays.filter { trackingDay -> trackingDay.date.formatTimestampToString() == currentDay },
+                        today = trackingDays.firstOrNull { trackingDay -> trackingDay.date.formatTimestampToString() == currentDay },
+                        selectedFoodItem = null,
+                        isLoading = false
+                    )
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message) }
             }
         }
     }
@@ -59,7 +85,7 @@ class NutritionViewModel(private val nutritionRepository: INutritionRepository) 
     }
 
 
-     fun updateSearchResults(foodItems: List<FoodItem>) {
+    fun updateSearchResults(foodItems: List<FoodItem>) {
         _uiState.update { currentState ->
             currentState.copy(searchResults = foodItems, isLoading = false, errorMessage = null)
         }
@@ -67,30 +93,16 @@ class NutritionViewModel(private val nutritionRepository: INutritionRepository) 
 
     fun saveFoodItemToDay(foodItem: FoodItem) {
         _uiState.update { it.copy(isLoading = true) }
-
-        nutritionRepository.saveFoodItemToDay(
-            foodItem = foodItem,
-            onSuccess = {
-                _uiState.update { it.copy(isLoading = false, errorMessage = null, selectedFoodItem = null)}
-            },
-            onFailure = { exception ->
-                _uiState.update { it.copy(isLoading = false, errorMessage = exception.message) }
-            }
-        )
+        viewModelScope.launch {
+            nutritionRepository.addFoodItemToTrackingDay(
+                foodItem = foodItem, trackingDayId = getCurrentDateString()
+            )
+        }
     }
 
     fun searchFoodBarcode(barcode: String) {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-        nutritionRepository.fetchProductByBarcode(
-            barcode,
-            onSuccess =  {
-                foodItem ->
-                _uiState.update { it.copy(selectedFoodItem = foodItem, isLoading = false, errorMessage = null, showBarcodeScanner = false) }
-            },
-            onError = { exception ->
-                _uiState.update { it.copy(isLoading = false, errorMessage = exception.message) }
-        }
-        )
+        nutritionRepository.fetchProductByBarcode(barcode)
     }
 
     fun onShowBarcodeScannerChange(show: Boolean) {
@@ -110,18 +122,6 @@ class NutritionViewModel(private val nutritionRepository: INutritionRepository) 
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {
             nutritionRepository.searchFood(query)
-            nutritionRepository.nutritionState.collect { state ->
-                when (state) {
-                    is NutritionState.Results -> {
-                        updateSearchResults(state.results)
-                    }
-                    is NutritionState.Error -> {
-                        _uiState.update { it.copy(isLoading = false, errorMessage = state.message) }
-                    }
-                    else -> { /* Handle other states if necessary */ }
-                }
-            }
         }
     }
-
 }

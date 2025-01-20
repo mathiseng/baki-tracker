@@ -38,10 +38,10 @@ fun FoodSummaryCard(
     fatsGoal: Int
 ) {
     // Calculate consumed values from the nutritionTrackingDay's food items
-    val caloriesConsumed = nutritionTrackingDay.food.sumOf { (it.calories * it.quantity).toInt() }
-    val proteinConsumed = nutritionTrackingDay.food.sumOf { (it.protein * it.quantity).toInt() }
-    val carbsConsumed = nutritionTrackingDay.food.sumOf { (it.carbs * it.quantity).toInt() }
-    val fatsConsumed = nutritionTrackingDay.food.sumOf { (it.fat * it.quantity).toInt() }
+    val caloriesConsumed = nutritionTrackingDay.foodItems.sumOf { (it.calories * it.quantity).toInt() }
+    val proteinConsumed = nutritionTrackingDay.foodItems.sumOf { (it.protein * it.quantity).toInt() }
+    val carbsConsumed = nutritionTrackingDay.foodItems.sumOf { (it.carbs * it.quantity).toInt() }
+    val fatsConsumed = nutritionTrackingDay.foodItems.sumOf { (it.fat * it.quantity).toInt() }
     val caloriesBurned = 200 // Static test value
 
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -208,7 +208,7 @@ fun NutrientBar(label: String, consumed: Int, goal: Int, consumedColor: Color) {
 @Composable
 fun PreviewFoodSummaryCard() {
     val sampleNutritionTrackingDay = NutritionTrackingDay(
-        date = Timestamp.now(), food = listOf(
+        date = Timestamp.now(), foodItems = listOf(
             FoodItem(
                 name = "Apple",
                 calories = 0.52f,

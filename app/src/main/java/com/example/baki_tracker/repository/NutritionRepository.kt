@@ -1,15 +1,14 @@
 package com.example.baki_tracker.repository
 
+import android.util.Log
 import com.example.baki_tracker.dependencyInjection.Singleton
 import com.example.baki_tracker.model.nutrition.FoodItem
 import com.example.baki_tracker.model.nutrition.NutritionTrackingDay
-import com.example.baki_tracker.utils.formatTimestampToString
 import com.example.baki_tracker.utils.getCurrentDateString
 import com.google.firebase.Firebase
-import com.google.firebase.Timestamp
 import com.google.firebase.app
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.Query
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,53 +25,119 @@ import kotlin.concurrent.thread
 @Inject
 @Singleton
 class NutritionRepository : INutritionRepository {
-    private val firestore = Firebase.firestore(Firebase.app, "baki-tracker-database")
+    private val db = Firebase.firestore(Firebase.app, "baki-tracker-database")
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val user = Firebase.auth
 
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .build()
 
-    private val _nutritionState = MutableStateFlow<NutritionState>(NutritionState.Idle)
-    override val nutritionState: Flow<NutritionState> = _nutritionState.asStateFlow()
+    private val client = OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).build()
 
-    override suspend fun fetchCurrentDay(): NutritionTrackingDay {
-        val userId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
-        val currentDate = getCurrentDateString()
-
-        val snapshot = firestore.collection("users")
-            .document(userId)
-            .collection("days")
-            .document(currentDate)
-            .get()
-            .await()
-
-        return snapshot.toObject(NutritionTrackingDay::class.java)
-            ?: NutritionTrackingDay(date = Timestamp.now(), food = emptyList())
+    //Path: users/{userId}/nutritionTrackingDays/
+    private val nutritionTrackingRef = user.currentUser?.let {
+        db.collection("users").document(it.uid).collection("nutritionTrackingDays")
     }
 
-    override suspend fun fetchHistory(): List<NutritionTrackingDay> {
-        val userId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+    private val _nutritionRequestState =
+        MutableStateFlow<NutritionRequestState>(NutritionRequestState.Idle)
+    override val nutritionRequestState: Flow<NutritionRequestState> =
+        _nutritionRequestState.asStateFlow()
 
-        val snapshot = firestore.collection("users")
-            .document(userId)
-            .collection("days")
-            .orderBy("date", Query.Direction.DESCENDING)
-            .get()
-            .await()
+    private val _nutritionTrackingDays = MutableStateFlow<List<NutritionTrackingDay>>(emptyList())
+    override val nutritionTrackingDays: Flow<List<NutritionTrackingDay>> =
+        _nutritionTrackingDays.asStateFlow()
 
-        return snapshot.toObjects(NutritionTrackingDay::class.java)
+
+    //Firebase
+    override suspend fun getNutritionTrackingDays() {
+        val trackingRef = nutritionTrackingRef?.get()?.await()
+        var currentDayExists = false
+        if (trackingRef != null) {
+            val nutritionTrackingDays = mutableListOf<NutritionTrackingDay>()
+            for (document in trackingRef) {
+                val nutritionTrackingDay = document.toObject(NutritionTrackingDay::class.java)
+                //nutritionTrackingDay.uuid = getCurrentDateString()
+                if (nutritionTrackingDay.uuid == getCurrentDateString()) {
+                    currentDayExists = true
+                }
+                nutritionTrackingDays.add(nutritionTrackingDay)
+            }
+            if (!currentDayExists) nutritionTrackingDays.add(NutritionTrackingDay())
+            _nutritionTrackingDays.update { nutritionTrackingDays }
+        }
     }
 
-    override fun fetchProductByBarcode(barcode: String, onSuccess: (FoodItem) -> Unit, onError: (Exception) -> Unit) {
+    override suspend fun addFoodItemToTrackingDay(
+        foodItem: FoodItem, trackingDayId: String
+    ) {
+        if (nutritionTrackingRef != null) {
+            val trackingDayDoc = nutritionTrackingRef.document(trackingDayId)
+
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(trackingDayDoc)
+                val currentNutritionTrackingDay = if (snapshot.exists()) {
+                    snapshot.toObject(NutritionTrackingDay::class.java) ?: NutritionTrackingDay()
+                } else {
+                    NutritionTrackingDay()
+                }
+
+                val updatedFoodList = currentNutritionTrackingDay.foodItems.toMutableList().apply {
+                    add(foodItem)
+                }
+
+                val updatedDay = currentNutritionTrackingDay.copy(foodItems = updatedFoodList)
+                transaction.set(trackingDayDoc, updatedDay)
+
+                _nutritionTrackingDays.value = _nutritionTrackingDays.value.map {
+                    if (it.uuid == trackingDayId) updatedDay else it
+                }
+            }
+        }
+    }
+
+    override suspend fun deleteFoodItemFromTrackingDay(
+        foodItemId: String, trackingDayId: String
+    ) {
+        val trackingDay = _nutritionTrackingDays.value.firstOrNull { it.uuid == trackingDayId }
+        val updatedList = trackingDay?.foodItems?.filterNot { it.uuid == foodItemId } ?: emptyList()
+
+        if (nutritionTrackingRef != null) {
+            val trackingDayDoc = nutritionTrackingRef.document(trackingDayId)
+            trackingDayDoc.update("foodItems", updatedList).await()
+
+            _nutritionTrackingDays.value = _nutritionTrackingDays.value.map {
+                if (it.uuid == trackingDayId) it.copy(foodItems = updatedList) else it
+            }
+            Log.d("NutritionRepo", "DocumentSnapshot successfully deleted!")
+        }
+    }
+
+    override suspend fun editFoodItemFromTrackingDay(
+        foodItem: FoodItem, trackingDayId: String
+    ) {
+        val trackingDay = _nutritionTrackingDays.value.firstOrNull { it.uuid == trackingDayId }
+        val updatedList =
+            trackingDay?.foodItems?.map { if (it.uuid == foodItem.uuid) foodItem else it }
+                ?: emptyList()
+
+        if (nutritionTrackingRef != null) {
+            val trackingDayDoc = nutritionTrackingRef.document(trackingDayId)
+            trackingDayDoc.update("foodItems", updatedList).await()
+
+            _nutritionTrackingDays.value = _nutritionTrackingDays.value.map {
+                if (it.uuid == trackingDayId) it.copy(foodItems = updatedList) else it
+            }
+        }
+    }
+
+    //====================//
+    //OpenFoodFacts logic
+    override fun fetchProductByBarcode(barcode: String) {
         val url = "https://world.openfoodfacts.org/api/v0/product/$barcode.json"
 
-        val request = Request.Builder()
-            .url(url)
-            .addHeader("User-Agent", "BakiTracker/0.1 (No Website)")
-            .build()
+        val request =
+            Request.Builder().url(url).addHeader("User-Agent", "BakiTracker/0.1 (No Website)")
+                .build()
 
         thread {
             try {
@@ -81,25 +146,17 @@ class NutritionRepository : INutritionRepository {
                     val jsonResponse = JSONObject(response.body?.string() ?: "")
                     val product = jsonResponse.optJSONObject("product")
                     if (product != null) {
-                        val foodItem = FoodItem(
-                            uuid = product.optInt("_id", 0).toString(),
-                            name = product.optString("product_name", "Unknown Product"),
-                            calories = product.optJSONObject("nutriments")?.optDouble("energy-kcal_100g", 0.0)?.toFloat()?.div(100) ?: 0f,
-                            protein = product.optJSONObject("nutriments")?.optDouble("proteins_100g", 0.0)?.toFloat()?.div(100) ?: 0f,
-                            carbs = product.optJSONObject("nutriments")?.optDouble("carbohydrates_100g", 0.0)?.toFloat()?.div(100) ?: 0f,
-                            fat = product.optJSONObject("nutriments")?.optDouble("fat_100g", 0.0)?.toFloat()?.div(100) ?: 0f,
-                            quantity =  product.optString("quantity", "1").toFloatOrNull() ?: 1f, // Default quantity for scanned products
-                            micronutrients = emptyMap() // Add micronutrients if available
-                        )
-                        onSuccess(foodItem)
+                        val foodItem = deserializeProduct(product)
+                        _nutritionRequestState.update { NutritionRequestState.SingleResult(foodItem) }
                     } else {
-                        onError(Exception("Product not found"))
+                        _nutritionRequestState.update { NutritionRequestState.Error("Product not found") }
                     }
                 } else {
-                    onError(Exception("API Error: ${response.message}"))
+                    _nutritionRequestState.update { NutritionRequestState.Error("API Error: ${response.message}") }
                 }
             } catch (e: Exception) {
-                onError(e)
+                _nutritionRequestState.update { NutritionRequestState.Error("${e.message}") }
+
             }
         }
     }
@@ -107,17 +164,17 @@ class NutritionRepository : INutritionRepository {
 
     override fun searchFood(query: String) {
         if (query.isBlank()) {
-            _nutritionState.update { NutritionState.Error("Search query cannot be empty") }
+            _nutritionRequestState.update { NutritionRequestState.Error("Search query cannot be empty") }
             return
         }
 
-        _nutritionState.update { NutritionState.Loading }
+        _nutritionRequestState.update { NutritionRequestState.Loading }
 
-        val url = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&action=process&json=1"
-        val request = Request.Builder()
-            .url(url)
-            .addHeader("User-Agent", "BakiTracker/0.1 (No Website)")
-            .build()
+        val url =
+            "https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&action=process&json=1"
+        val request =
+            Request.Builder().url(url).addHeader("User-Agent", "BakiTracker/0.1 (No Website)")
+                .build()
 
         thread {
             try {
@@ -129,126 +186,106 @@ class NutritionRepository : INutritionRepository {
                     for (i in 0 until products.length()) {
                         val product = products.getJSONObject(i)
                         //div by 100 because values are given per 100g
-                        val productName = product.optString("product_name", "Unknown Product")
-                        val productCalories = product.optJSONObject("nutriments")?.optDouble("energy-kcal", 0.0)?.toFloat()?.div(100) ?: 0f
-                        val productProtein = product.optJSONObject("nutriments")?.optDouble("proteins_100g", 0.0)?.toFloat()?.div(100) ?: 0f
-                        val productCarbs = product.optJSONObject("nutriments")?.optDouble("carbohydrates_100g", 0.0)?.toFloat()?.div(100) ?: 0f
-                        val productFat = product.optJSONObject("nutriments")?.optDouble("fat_100g", 0.0)?.toFloat()?.div(100) ?: 0f
-                        val productMicronutrients = mutableMapOf<String, Float>()
-                        val productQuantity = product.optString("quantity", "1").toFloatOrNull() ?: 1f
+                        val foodItem =deserializeProduct(product)
 
-                        // Extract micronutrients (optional, depending on API response)
-                        val micronutrientKeys = listOf("vitamin_c_100g", "iron_100g", "calcium_100g")
-                        micronutrientKeys.forEach { key ->
-                            val value = product.optJSONObject("nutriments")?.optDouble(key, 0.0)?.toFloat() ?: 0f
-                            if (value > 0) productMicronutrients[key] = value
-                        }
-
-                        results.add(
-                            FoodItem(
-                                uuid = "$i",
-                                name = productName,
-                                calories = productCalories,
-                                protein = productProtein,
-                                carbs = productCarbs,
-                                fat = productFat,
-                                quantity = productQuantity,
-                                micronutrients = productMicronutrients
-                            )
-                        )
+                        results.add(foodItem)
                     }
-                    _nutritionState.update { NutritionState.Results(results) }
+                    _nutritionRequestState.update { NutritionRequestState.Results(results) }
                 } else {
-                    _nutritionState.update { NutritionState.Error("API Error: ${response.message}") }
+                    _nutritionRequestState.update { NutritionRequestState.Error("API Error: ${response.message}") }
                 }
             } catch (e: Exception) {
-                _nutritionState.update { NutritionState.Error("Network Error: ${e.message}") }
+                _nutritionRequestState.update { NutritionRequestState.Error("Network Error: ${e.message}") }
             }
         }
     }
-    override fun saveFoodItemToDay(foodItem: FoodItem, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
-            onFailure(Exception("User not authenticated"))
-            return
+
+    private fun deserializeProduct(product: JSONObject): FoodItem {
+        //div by 100 because values are given per 100g
+        val productName = product.optString("product_name", "Unknown Product")
+        val productCalories =
+            product.optJSONObject("nutriments")?.optDouble("energy-kcal", 0.0)
+                ?.toFloat()?.div(100) ?: 0f
+        val productProtein =
+            product.optJSONObject("nutriments")?.optDouble("proteins_100g", 0.0)
+                ?.toFloat()?.div(100) ?: 0f
+        val productCarbs = product.optJSONObject("nutriments")
+            ?.optDouble("carbohydrates_100g", 0.0)?.toFloat()?.div(100) ?: 0f
+        val productFat =
+            product.optJSONObject("nutriments")?.optDouble("fat_100g", 0.0)
+                ?.toFloat()?.div(100) ?: 0f
+        val productMicronutrients = mutableMapOf<String, Float>()
+        val productQuantity =
+            product.optString("quantity", "1").toFloatOrNull() ?: 1f
+
+        // Extract micronutrients (optional, depending on API response)
+        val micronutrientKeys =
+            listOf("vitamin_c_100g", "iron_100g", "calcium_100g")
+        micronutrientKeys.forEach { key ->
+            val value =
+                product.optJSONObject("nutriments")?.optDouble(key, 0.0)?.toFloat()
+                    ?: 0f
+            if (value > 0) productMicronutrients[key] = value
         }
 
-        val userId = currentUser.uid
-        val currentDate = Timestamp.now()
-
-        val dayRef = firestore.collection("users")
-            .document(userId)
-            .collection("days")
-            .document(currentDate.formatTimestampToString())
-
-        firestore.runTransaction { transaction ->
-            val snapshot = transaction.get(dayRef)
-            val currentNutritionTrackingDay = if (snapshot.exists()) {
-                snapshot.toObject(NutritionTrackingDay::class.java) ?: NutritionTrackingDay(date = currentDate, food = emptyList())
-            } else {
-                NutritionTrackingDay(date = currentDate, food = emptyList())
-            }
-
-            val updatedFoodList = currentNutritionTrackingDay.food.toMutableList().apply {
-                add(foodItem)
-            }
-
-            val updatedDay = currentNutritionTrackingDay.copy(food = updatedFoodList)
-            transaction.set(dayRef, updatedDay)
-        }.addOnSuccessListener {
-            onSuccess()
-        }.addOnFailureListener { exception ->
-            onFailure(exception)
-        }
-    }
-    override fun observeUserHistory(
-        onUpdate: (List<NutritionTrackingDay>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
-            onError(Exception("User not authenticated"))
-            return
-        }
-
-        val userId = currentUser.uid
-        firestore.collection("users")
-            .document(userId)
-            .collection("days")
-            .orderBy("date", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    onError(error)
-                    return@addSnapshotListener
-                }
-
-                if (snapshot != null) {
-                    val days = snapshot.toObjects(NutritionTrackingDay::class.java)
-                    onUpdate(days)
-                }
-            }
+        return FoodItem(
+            name = productName,
+            calories = productCalories,
+            protein = productProtein,
+            carbs = productCarbs,
+            fat = productFat,
+            quantity = productQuantity,
+            micronutrients = productMicronutrients
+        )
     }
 }
-
 
 
 interface INutritionRepository {
-    val nutritionState: Flow<NutritionState>
-    fun searchFood(query: String)
-    fun saveFoodItemToDay(foodItem: FoodItem, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
-    fun observeUserHistory(
-        onUpdate: (List<NutritionTrackingDay>) -> Unit,
-        onError: (Exception) -> Unit
-    )
-    suspend fun fetchCurrentDay(): NutritionTrackingDay
-    suspend fun fetchHistory(): List<NutritionTrackingDay>
-    fun fetchProductByBarcode(barcode: String, onSuccess: (FoodItem) -> Unit, onError: (Exception) -> Unit)
+    val nutritionRequestState: Flow<NutritionRequestState>
+    val nutritionTrackingDays: Flow<List<NutritionTrackingDay>>
 
+    fun searchFood(query: String)
+
+    fun fetchProductByBarcode(barcode: String)
+
+    /**
+     * Retrieves a list of all nutrition tracking days. Updates the nutritionTrackingDays stateFlow you can observe
+     */
+    suspend fun getNutritionTrackingDays()
+
+    /**
+     * Adds a nutrition entry to an existing nutrition tracking day. If the day does not exist, create it.
+     * @param foodItem: The entry to add (e.g., a food item for the day).
+     * @param trackingDayId: The ID of the tracking day where the entry should be added.
+     */
+    suspend fun addFoodItemToTrackingDay(
+        foodItem: FoodItem, trackingDayId: String
+    )
+
+    /**
+     * Deletes a specific nutrition entry from a given nutrition tracking day.
+     * @param foodItemId: The ID of the nutrition entry to be deleted.
+     * @param trackingDayId: The ID of the tracking day where the entry should be removed.
+     */
+    suspend fun deleteFoodItemFromTrackingDay(foodItemId: String, trackingDayId: String)
+
+    /**
+     * Edits an existing nutrition entry within a nutrition tracking day.
+     * @param foodItem: The updated nutrition entry to replace the existing one.
+     * @param trackingDayId: The ID of the tracking day containing the entry to edit.
+     */
+    suspend fun editFoodItemFromTrackingDay(
+        foodItem: FoodItem, trackingDayId: String
+    )
 }
 
-sealed class NutritionState {
-    data object Idle : NutritionState()
-    data object Loading : NutritionState()
-    data class Results(val results: List<FoodItem>) : NutritionState()
-    data class Error(val message: String) : NutritionState()
+sealed class NutritionRequestState {
+    data object Idle : NutritionRequestState()
+    data object Loading : NutritionRequestState()
+    data class Results(val results: List<FoodItem>) : NutritionRequestState()
+    data class SingleResult(val foodItem: FoodItem) :
+        NutritionRequestState() // For a product which was scanned by bar code
+
+    data class Error(val message: String) : NutritionRequestState()
 }
