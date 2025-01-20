@@ -2,6 +2,7 @@ package com.example.baki_tracker.repository
 
 import android.util.Log
 import com.example.baki_tracker.dependencyInjection.Singleton
+import com.example.baki_tracker.model.nutrition.FoodItem
 import com.example.baki_tracker.model.nutrition.NutritionEntry
 import com.example.baki_tracker.model.nutrition.NutritionTrackingDay
 import com.google.firebase.Timestamp
@@ -46,11 +47,11 @@ class NutritionDatabaseRepository() : INutritionDatabaseRepository {
     }
 
     override suspend fun addNutritionEntryToTrackingDay(
-        nutritionEntry: NutritionEntry, trackingDayId: String
+        foodItem: FoodItem, trackingDayId: String
     ) {
         val currentTrackingDay =
             _nutritionTrackingDays.value.firstOrNull { it.uuid == trackingDayId }
-        val updatedList = (currentTrackingDay?.nutritionEntries ?: emptyList()) + nutritionEntry
+        val updatedList = (currentTrackingDay?.foodItems ?: emptyList()) + foodItem
 
         if (nutritionTrackingRef != null) {
             val trackingDayDoc = nutritionTrackingRef.document(trackingDayId)
@@ -76,7 +77,7 @@ class NutritionDatabaseRepository() : INutritionDatabaseRepository {
     ) {
         val trackingDay = _nutritionTrackingDays.value.firstOrNull { it.uuid == trackingDayId }
         val updatedList =
-            trackingDay?.nutritionEntries?.filterNot { it.uuid == nutritionEntryId } ?: emptyList()
+            trackingDay?.foodItems?.filterNot { it.uuid == nutritionEntryId } ?: emptyList()
 
         if (nutritionTrackingRef != null) {
             val trackingDayDoc = nutritionTrackingRef.document(trackingDayId)
@@ -90,7 +91,7 @@ class NutritionDatabaseRepository() : INutritionDatabaseRepository {
     ) {
         val trackingDay = _nutritionTrackingDays.value.firstOrNull { it.uuid == trackingDayId }
         val updatedList =
-            trackingDay?.nutritionEntries?.map { if (it.uuid == nutritionEntry.uuid) nutritionEntry else it }
+            trackingDay?.foodItems?.map { if (it.uuid == nutritionEntry.uuid) nutritionEntry else it }
                 ?: emptyList()
 
         if (nutritionTrackingRef != null) {
@@ -117,7 +118,7 @@ interface INutritionDatabaseRepository {
      * @param trackingDayId: The ID of the tracking day where the entry should be added.
      */
     suspend fun addNutritionEntryToTrackingDay(
-        nutritionEntry: NutritionEntry, trackingDayId: String
+        foodItem: FoodItem, trackingDayId: String
     )
 
     /**

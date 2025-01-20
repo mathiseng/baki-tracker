@@ -28,10 +28,10 @@ import com.google.firebase.Timestamp
 
 @Composable
 fun NutritionHistoryCard(nutritionTrackingDay: NutritionTrackingDay) {
-    val totalCarbs = nutritionTrackingDay.food.sumOf { (it.carbs * it.quantity).toInt() }
-    val totalFat = nutritionTrackingDay.food.sumOf { (it.fat * it.quantity).toInt() }
-    val totalProtein = nutritionTrackingDay.food.sumOf { (it.protein * it.quantity).toInt() }
-    val totalCalories = nutritionTrackingDay.food.sumOf { (it.calories * it.quantity).toInt() }
+    val totalCarbs = nutritionTrackingDay.foodItems.sumOf { (it.carbs * it.quantity).toInt() }
+    val totalFat = nutritionTrackingDay.foodItems.sumOf { (it.fat * it.quantity).toInt() }
+    val totalProtein = nutritionTrackingDay.foodItems.sumOf { (it.protein * it.quantity).toInt() }
+    val totalCalories = nutritionTrackingDay.foodItems.sumOf { (it.calories * it.quantity).toInt() }
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -46,7 +46,7 @@ fun NutritionHistoryCard(nutritionTrackingDay: NutritionTrackingDay) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            nutritionTrackingDay.food.forEach { foodItem ->
+            nutritionTrackingDay.foodItems.forEach { foodItem ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -96,7 +96,7 @@ fun NutrientCircle(label: String, value: Int) {
 @Composable
 fun PreviewUpdatedNutritionHistoryCard() {
     val sampleNutritionTrackingDay = NutritionTrackingDay(
-        date = Timestamp.now(), food = listOf(
+        date = Timestamp.now(), foodItems = listOf(
             FoodItem(
                 name = "Apple",
                 carbs = 25f,
