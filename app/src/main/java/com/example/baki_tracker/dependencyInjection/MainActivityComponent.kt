@@ -1,6 +1,8 @@
 package com.example.baki_tracker.dependencyInjection
 
 import com.example.baki_tracker.RootContainer
+import com.example.baki_tracker.nutrition.ISharedNutritionStateRepository
+import com.example.baki_tracker.nutrition.SharedNutritionStateRepository
 import com.example.baki_tracker.repository.AuthRepository
 import com.example.baki_tracker.repository.IAuthRepository
 import com.example.baki_tracker.repository.INutritionDatabaseRepository
@@ -46,6 +48,9 @@ abstract class MainActivityComponent(@Component val parent: ApplicationComponent
 
     @get:Provides
     val sharedWorkoutStateRepository: ISharedWorkoutStateRepository = SharedWorkoutStateRepository()
+
+    @get:Provides
+    val sharedNutritionStateRepository: ISharedNutritionStateRepository = SharedNutritionStateRepository()
 
     //Dependecy Provider
     // abstract val dependencyProvider: RootDependencyProvider

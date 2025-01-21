@@ -48,4 +48,6 @@
     <string name="predefined_workout_description">Wähle ein vordefiniertes Workout aus deiner Liste</string>
     <string name="today">Heute</string>
     <string name="set">Satz</string>
+    <string name="delete_fooditem">Nahrungsmittel Löschen</string>
+    <string name="delete_fooditem_confirmation">Bist du sicher, dass du dieses Nahrungsmittel löschen möchtest? Diese Atkion kann nicht rückgängig gemacht werden.</string>
 </resources>
