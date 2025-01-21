@@ -3,6 +3,7 @@ package com.example.baki_tracker.nutrition
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.baki_tracker.model.nutrition.FoodItem
+import com.example.baki_tracker.model.nutrition.NutritionTrackingDay
 import com.example.baki_tracker.repository.INutritionRepository
 import com.example.baki_tracker.repository.NutritionRequestState
 import com.example.baki_tracker.utils.formatTimestampToString
@@ -15,7 +16,10 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class NutritionViewModel(private val nutritionRepository: INutritionRepository) : ViewModel() {
+class NutritionViewModel(
+    private val nutritionRepository: INutritionRepository,
+    private val sharedNutritionStateRepository: ISharedNutritionStateRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NutritionUiState.initialUiState())
     val uiState: StateFlow<NutritionUiState> = _uiState.asStateFlow()
@@ -111,6 +115,11 @@ class NutritionViewModel(private val nutritionRepository: INutritionRepository) 
 
     fun onFoodItemSelectionChange(foodItem: FoodItem?) {
         _uiState.update { it.copy(selectedFoodItem = foodItem) }
+    }
+
+    fun onDetailsClick(trackingDay: NutritionTrackingDay) {
+        sharedNutritionStateRepository.updateSelectedTrackingDay(trackingDay)
+        sharedNutritionStateRepository.updateSelectedBottomSheet(NutritionBottomSheet.DETAILS)
     }
 
     fun searchFood() {

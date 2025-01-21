@@ -1,6 +1,7 @@
 package com.example.baki_tracker.nutrition.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,13 +29,13 @@ import com.google.firebase.Timestamp
 
 
 @Composable
-fun NutritionHistoryCard(nutritionTrackingDay: NutritionTrackingDay) {
+fun NutritionHistoryCard(nutritionTrackingDay: NutritionTrackingDay, onDetailsClick: () -> Unit) {
     val totalCarbs = nutritionTrackingDay.foodItems.sumOf { (it.carbs * it.quantity).toInt() }
     val totalFat = nutritionTrackingDay.foodItems.sumOf { (it.fat * it.quantity).toInt() }
     val totalProtein = nutritionTrackingDay.foodItems.sumOf { (it.protein * it.quantity).toInt() }
     val totalCalories = nutritionTrackingDay.foodItems.sumOf { (it.calories * it.quantity).toInt() }
 
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card( elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),modifier = Modifier.fillMaxWidth().clickable { onDetailsClick() }) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
@@ -122,5 +124,5 @@ fun PreviewUpdatedNutritionHistoryCard() {
         )
     )
 
-    NutritionHistoryCard(nutritionTrackingDay = sampleNutritionTrackingDay)
+    NutritionHistoryCard(nutritionTrackingDay = sampleNutritionTrackingDay,{})
 }

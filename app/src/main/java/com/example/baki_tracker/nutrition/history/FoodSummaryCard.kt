@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,20 +32,21 @@ import com.google.firebase.Timestamp
 
 @Composable
 fun FoodSummaryCard(
-    nutritionTrackingDay: NutritionTrackingDay,
+    modifier: Modifier = Modifier,
+    foodItems: List<FoodItem>,
     calorieGoal: Int,
     proteinGoal: Int,
     carbsGoal: Int,
     fatsGoal: Int
 ) {
     // Calculate consumed values from the nutritionTrackingDay's food items
-    val caloriesConsumed = nutritionTrackingDay.foodItems.sumOf { (it.calories * it.quantity).toInt() }
-    val proteinConsumed = nutritionTrackingDay.foodItems.sumOf { (it.protein * it.quantity).toInt() }
-    val carbsConsumed = nutritionTrackingDay.foodItems.sumOf { (it.carbs * it.quantity).toInt() }
-    val fatsConsumed = nutritionTrackingDay.foodItems.sumOf { (it.fat * it.quantity).toInt() }
+    val caloriesConsumed = foodItems.sumOf { (it.calories * it.quantity).toInt() }
+    val proteinConsumed = foodItems.sumOf { (it.protein * it.quantity).toInt() }
+    val carbsConsumed = foodItems.sumOf { (it.carbs * it.quantity).toInt() }
+    val fatsConsumed = foodItems.sumOf { (it.fat * it.quantity).toInt() }
     val caloriesBurned = 200 // Static test value
 
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card( elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
@@ -228,7 +230,7 @@ fun PreviewFoodSummaryCard() {
     )
 
     FoodSummaryCard(
-        nutritionTrackingDay = sampleNutritionTrackingDay,
+        foodItems = sampleNutritionTrackingDay.foodItems,
         calorieGoal = 2000,
         proteinGoal = 150,
         carbsGoal = 200,

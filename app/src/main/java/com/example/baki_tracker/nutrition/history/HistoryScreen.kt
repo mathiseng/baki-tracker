@@ -1,5 +1,6 @@
 package com.example.baki_tracker.nutrition.history
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +34,7 @@ fun HistoryScreen(nutritionViewModel: () -> NutritionViewModel) {
     Column(
         Modifier
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 24.dp)
     ) {
         // Section for "Today"
         Text(
@@ -47,13 +48,13 @@ fun HistoryScreen(nutritionViewModel: () -> NutritionViewModel) {
 
         // Show summary card for today's data if available
         uiState.today?.let { today ->
-                FoodSummaryCard(
-                    nutritionTrackingDay = today,
-                    calorieGoal = 2000, // Replace with dynamic goal if available
-                    proteinGoal = 150,
-                    carbsGoal = 200,
-                    fatsGoal = 70
-                )
+            FoodSummaryCard(modifier = Modifier.clickable {  viewModel.onDetailsClick(today)  },
+                foodItems = today.foodItems,
+                calorieGoal = 2000, // Replace with dynamic goal if available
+                proteinGoal = 150,
+                carbsGoal = 200,
+                fatsGoal = 70
+            )
         } ?: run {
             Text(
                 text = "Loading...",
@@ -72,7 +73,7 @@ fun HistoryScreen(nutritionViewModel: () -> NutritionViewModel) {
                     fontWeight = FontWeight.Light,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                NutritionHistoryCard(historyDay)
+                NutritionHistoryCard(historyDay, { viewModel.onDetailsClick(historyDay) })
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
