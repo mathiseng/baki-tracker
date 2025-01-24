@@ -4,17 +4,19 @@ import com.example.baki_tracker.RootContainer
 import com.example.baki_tracker.nutrition.ISharedNutritionStateRepository
 import com.example.baki_tracker.nutrition.SharedNutritionStateRepository
 import com.example.baki_tracker.repository.AuthRepository
+import com.example.baki_tracker.repository.GoogleRepository
 import com.example.baki_tracker.repository.IAuthRepository
+import com.example.baki_tracker.repository.IGoogleRepository
 import com.example.baki_tracker.repository.INutritionDatabaseRepository
+import com.example.baki_tracker.repository.INutritionRepository
 import com.example.baki_tracker.repository.IUserProfileRepository
 import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
 import com.example.baki_tracker.repository.NutritionDatabaseRepository
+import com.example.baki_tracker.repository.NutritionRepository
 import com.example.baki_tracker.repository.UserProfileRepository
 import com.example.baki_tracker.repository.WorkoutDatabaseRepository
 import com.example.baki_tracker.workout.ISharedWorkoutStateRepository
 import com.example.baki_tracker.workout.SharedWorkoutStateRepository
-import com.example.baki_tracker.repository.INutritionRepository
-import com.example.baki_tracker.repository.NutritionRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -33,6 +35,9 @@ abstract class MainActivityComponent(@Component val parent: ApplicationComponent
     //Repositories
     @get:Provides
     val authRepository: IAuthRepository = AuthRepository()
+
+    @get:Provides
+    val googleRepository: IGoogleRepository = GoogleRepository(context = parent.context)
 
     @get:Provides
     val nutritionRepository: INutritionRepository = NutritionRepository()
