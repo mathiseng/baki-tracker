@@ -12,12 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.baki_tracker.model.nutrition.FoodItem
 
 @Composable
 fun FoodItemCard(
-    name: String,
-    quantity: String,
-    calories: String,
+    foodItem: FoodItem,
     onClick: () -> Unit
 ) {
     Card(
@@ -29,12 +28,12 @@ fun FoodItemCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = name,
+                text = foodItem.name,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.W500
             )
             Text(
-                text = "$quantity - $calories",
+                text = "100g - ${foodItem.calories * 100} kcal",
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
