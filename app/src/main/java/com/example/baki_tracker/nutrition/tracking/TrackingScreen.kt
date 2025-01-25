@@ -142,9 +142,8 @@ fun TrackingScreen(nutritionViewModel: () -> NutritionViewModel, scanScreen: Sca
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(uiState.searchResults) { foodItem ->
-                    FoodItemCard(name = foodItem.name,
-                        quantity = "${foodItem.quantity} unit(s)",
-                        calories = "${foodItem.calories} kcal",
+                    FoodItemCard(
+                        foodItem,
                         onClick = {
                             // Set selected food item and show bottom sheet
                             viewModel.onFoodItemSelectionChange(foodItem)
@@ -175,7 +174,7 @@ fun FoodDetailsBottomSheetContent(
     onDismiss: () -> Unit,
 ) {
     // State for editable quantity (as a String to handle input properly)
-    val quantityInGrams = remember { mutableStateOf(foodItem.quantity.toInt().toString()) }
+    val quantityInGrams = remember { mutableStateOf((foodItem.quantity.toInt() * 100).toString()) }
 
     // Dynamically calculate the scaled values
     val quantityAsInt = quantityInGrams.value.toIntOrNull() ?: 0
@@ -190,7 +189,7 @@ fun FoodDetailsBottomSheetContent(
             text = foodItem.name, fontSize = 20.sp, fontWeight = FontWeight.Bold
         )
         // Input field for quantity
-        TextField(value = quantityInGrams.value,
+        TextField(value = (quantityInGrams.value),
             onValueChange = { input ->
                 // Allow only numeric input
                 if (input.all { it.isDigit() }) {

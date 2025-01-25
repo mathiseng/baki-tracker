@@ -18,6 +18,7 @@ import kotlinx.coroutines.tasks.await
 import me.tatarka.inject.annotations.Inject
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -161,7 +162,7 @@ class NutritionRepository : INutritionRepository {
         }
     }
 
-
+/*
     override fun searchFood(query: String) {
         if (query.isBlank()) {
             _nutritionRequestState.update { NutritionRequestState.Error("Search query cannot be empty") }
@@ -169,6 +170,8 @@ class NutritionRepository : INutritionRepository {
         }
 
         _nutritionRequestState.update { NutritionRequestState.Loading }
+
+
 
         val url =
             "https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&action=process&json=1"
@@ -198,7 +201,7 @@ class NutritionRepository : INutritionRepository {
                 _nutritionRequestState.update { NutritionRequestState.Error("Network Error: ${e.message}") }
             }
         }
-    }
+    }*/
 
     private fun deserializeProduct(product: JSONObject): FoodItem {
         //div by 100 because values are given per 100g
@@ -238,6 +241,103 @@ class NutritionRepository : INutritionRepository {
             micronutrients = productMicronutrients
         )
     }
+
+
+    //USDA Logic
+    override fun searchFood(query: String) {
+        if (query.isBlank()) {
+            _nutritionRequestState.update { NutritionRequestState.Error("Search query cannot be empty") }
+            return
+        }
+
+        _nutritionRequestState.update { NutritionRequestState.Loading }
+
+        // USDA API key
+        val apiKey = "noiZQKV79NVmuqWW4g1biJuR6U45D3JtrXzDTf3V" // Replace with your actual API key
+
+        val url = "https://api.nal.usda.gov/fdc/v1/foods/search?query=$query&api_key=$apiKey"
+        val request = Request.Builder()
+            .url(url)
+            .build()
+
+        thread {
+            try {
+                val response = client.newCall(request).execute()
+                if (response.isSuccessful) {
+                    val jsonResponse = JSONObject(response.body?.string() ?: "")
+                    val foods = jsonResponse.getJSONArray("foods")
+                    val results = mutableListOf<FoodItem>()
+
+                    for (i in 0 until foods.length()) {
+                        val product = foods.getJSONObject(i)
+                        val foodItem = deserializeProductUSDA(product)
+                        results.add(foodItem)
+                    }
+                    _nutritionRequestState.update { NutritionRequestState.Results(results) }
+                } else {
+                    _nutritionRequestState.update { NutritionRequestState.Error("API Error: ${response.message}") }
+                }
+            } catch (e: Exception) {
+                _nutritionRequestState.update { NutritionRequestState.Error("Network Error: ${e.message}") }
+            }
+        }
+    }
+    private fun JSONArray.findNutrient(nutrientName: String): Double? {
+        for (i in 0 until this.length()) {
+            val nutrient = this.getJSONObject(i)
+            if (nutrient.optString("nutrientName") == nutrientName) {
+                return nutrient.optDouble("value", 0.0)
+            }
+        }
+        return null
+    }
+
+    private fun deserializeProductUSDA(product: JSONObject): FoodItem {
+        val productName = product.optString("description", "Unknown Product")
+        val productCalories = product.optJSONArray("foodNutrients")
+            ?.findNutrient("Energy")
+            ?.toFloat()
+            ?.div(100) // Already for 100g in USDA, no division needed
+            ?: 0f
+        val productProtein = product.optJSONArray("foodNutrients")
+            ?.findNutrient("Protein")
+            ?.toFloat()
+            ?.div(100) // Divide by 1 for clarity
+            ?: 0f
+        val productCarbs = product.optJSONArray("foodNutrients")
+            ?.findNutrient("Carbohydrate, by difference")
+            ?.toFloat()
+            ?.div(100) ?: 0f
+        val productFat = product.optJSONArray("foodNutrients")
+            ?.findNutrient("Total lipid (fat)")
+            ?.toFloat()
+            ?.div(100) ?: 0f
+
+        val productMicronutrients = mutableMapOf<String, Float>()
+        val micronutrientKeys = listOf("Vitamin C", "Iron", "Calcium")
+        micronutrientKeys.forEach { key ->
+            val value = product.optJSONArray("foodNutrients")
+                ?.findNutrient(key)
+                ?.toFloat()
+                ?: 0f
+            if (value > 0) productMicronutrients[key] = value
+        }
+
+        return FoodItem(
+            uuid = product.optString("fdcId", "0"),
+            name = productName,
+            calories = productCalories, // Per Gram
+            protein = productProtein,
+            carbs = productCarbs,
+            fat = productFat,
+            quantity = 1f, // All Values are per 1g
+            micronutrients = productMicronutrients
+        )
+    }
+
+
+
+
 }
 
 
