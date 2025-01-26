@@ -255,7 +255,8 @@ class NutritionRepository : INutritionRepository {
         // USDA API key
         val apiKey = "noiZQKV79NVmuqWW4g1biJuR6U45D3JtrXzDTf3V" // Replace with your actual API key
 
-        val url = "https://api.nal.usda.gov/fdc/v1/foods/search?query=$query&api_key=$apiKey"
+        val cleanedQuery = query.trim().lowercase().replace(Regex("[^a-z ]"), "")
+        val url = "https://api.nal.usda.gov/fdc/v1/foods/search?query=$cleanedQuery&api_key=$apiKey"
         val request = Request.Builder()
             .url(url)
             .build()
@@ -271,7 +272,9 @@ class NutritionRepository : INutritionRepository {
                     for (i in 0 until foods.length()) {
                         val product = foods.getJSONObject(i)
                         val foodItem = deserializeProductUSDA(product)
-                        results.add(foodItem)
+                        if (foodItem != null) {
+                            results.add(foodItem)
+                        }
                     }
                     _nutritionRequestState.update { NutritionRequestState.Results(results) }
                 } else {
@@ -292,8 +295,26 @@ class NutritionRepository : INutritionRepository {
         return null
     }
 
-    private fun deserializeProductUSDA(product: JSONObject): FoodItem {
+    private fun calculateMatchScore(query: String, name: String): Int {
+        val cleanedQuery = query.lowercase()
+        val cleanedName = name.lowercase()
+
+        return when {
+            cleanedName == cleanedQuery -> 100 // Exact match
+            cleanedName.startsWith(cleanedQuery) -> 75 // Starts with the query
+            cleanedName.contains(cleanedQuery) -> 50 // Contains the query
+            else -> 0 // No match
+        }
+    }
+
+
+    private fun deserializeProductUSDA(product: JSONObject): FoodItem? {
         val productName = product.optString("description", "Unknown Product")
+        // Skip results where the name is in all caps
+        if (productName == productName.uppercase()) {
+            return null // Skip this product
+        }
+
         val productCalories = product.optJSONArray("foodNutrients")
             ?.findNutrient("Energy")
             ?.toFloat()
