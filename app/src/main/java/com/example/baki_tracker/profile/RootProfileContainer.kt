@@ -1,16 +1,24 @@
 package com.example.baki_tracker.profile
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.baki_tracker.R
 import com.example.baki_tracker.dependencyInjection.viewModel
@@ -32,12 +40,41 @@ fun RootProfileContainer(profileViewModel: () -> ProfileViewModel) {
         Button(onClick = { viewModel.logout() }) { Text(stringResource(R.string.signout)) }
         Log.d("TESTII COMPOSABLE", "$authenticated")
         if (authenticated is GoogleAuthState.Authenticated) {
-            Button(onClick = { viewModel.onSignOutWithGoogle() }) { Text("Sign Out from google") }
+            OutlinedButton( modifier = Modifier
+                .padding(vertical = 8.dp)
+                .height(height = 48.dp),
+                onClick = { viewModel.onSignOutWithGoogle() }, colors = ButtonColors(
+                    MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContainerColor =  MaterialTheme.colorScheme.surface,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Image(
+                    modifier = Modifier.padding(end = 4.dp),
+                    painter = painterResource(R.drawable.ic_google_logo),
+                    contentDescription = ""
+                )
+                Text("Sign Out from google")
+            }
         } else {
-            Button(onClick = { viewModel.onSignUpWithGoogle() }) { Text("Sign up with google") }
-
+            OutlinedButton( modifier = Modifier
+                .padding(vertical = 8.dp)
+                .height(height = 48.dp),
+                onClick = { viewModel.onSignUpWithGoogle() }, colors = ButtonColors(
+                    MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Image(
+                    modifier = Modifier.padding(end = 4.dp),
+                    painter = painterResource(R.drawable.ic_google_logo),
+                    contentDescription = ""
+                )
+                Text("Sign up with google")
+            }
         }
-
-        Button(onClick = { viewModel.test() }) { Text("Test") }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.baki_tracker.workout.planning
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,17 +17,21 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,73 +54,118 @@ fun PlanningScreen(planningViewModel: () -> PlanningViewModel) {
 
     val uiState by viewModel.uiState.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        //.verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(
-            text = "Planned Workouts",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.W400,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
+    LaunchedEffect ( uiState.isAuthenticated ){
+        if(uiState.isAuthenticated) viewModel.refreshCalendarEvents()
+    }
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            uiState.plannedMap.forEach { (date, plannedWorkouts) ->
+    if (!uiState.isAuthenticated) {
 
-                item {
-                    if (viewModel.currentDateString == date) {
-                        Text(
-                            text = stringResource(R.string.today),
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Light,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    } else {
-                        Text(
-                            text = date,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Light,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-                }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-                itemsIndexed(plannedWorkouts) { index, item ->
-                    PlanningCard(item,
-                        { viewModel.onOptionsSelected(item) },
-                        { viewModel.onStartWorkout(item.workoutId) })
-                    Spacer(Modifier.height(16.dp))
-
-                    if (index == plannedWorkouts.lastIndex) {
-                        Spacer(Modifier.height(16.dp))
-                    }
-                }
-
-                item {
-                    if (viewModel.currentDateString == date) {
-                        HorizontalDivider()
-                        Text(
-                            text = "Upcoming Workouts",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.W400,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                }
-
+            Text(
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                text = "Not Connected"
+            )
+            Text(
+                modifier = Modifier.padding(vertical = 8.dp),
+                textAlign = TextAlign.Center,
+                text = "In order to use these feature and to schedule workouts via your Google Calendar please Sign Up with Google"
+            )
+            OutlinedButton(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .height(height = 48.dp),
+                onClick = { viewModel.onSignUpWithGoogle() }, colors = ButtonColors(
+                    MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Image(
+                    modifier = Modifier.padding(end = 4.dp),
+                    painter = painterResource(R.drawable.ic_google_logo),
+                    contentDescription = ""
+                )
+                Text("Sign up with google")
             }
         }
-
-        Button(
-            onClick = { viewModel.onShowPlanBottomSheetChange(true) },
+    } else {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth()
-        ) { Text("Plan Workout") }
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            //.verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = "Planned Workouts",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.W400,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                uiState.plannedMap.forEach { (date, plannedWorkouts) ->
+
+                    item {
+                        if (viewModel.currentDateString == date) {
+                            Text(
+                                text = stringResource(R.string.today),
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Light,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        } else {
+                            Text(
+                                text = date,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Light,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                    }
+
+                    itemsIndexed(plannedWorkouts) { index, item ->
+                        PlanningCard(item,
+                            { viewModel.onOptionsSelected(item) },
+                            { viewModel.onStartWorkout(item.workoutId) })
+                        Spacer(Modifier.height(16.dp))
+
+                        if (index == plannedWorkouts.lastIndex) {
+                            Spacer(Modifier.height(16.dp))
+                        }
+                    }
+
+                    item {
+                        if (viewModel.currentDateString == date) {
+                            HorizontalDivider()
+                            Text(
+                                text = "Upcoming Workouts",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.W400,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                    }
+
+                }
+            }
+
+            Button(
+                onClick = { viewModel.onShowPlanBottomSheetChange(true) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth()
+            ) { Text("Plan Workout") }
+        }
     }
 }
 
