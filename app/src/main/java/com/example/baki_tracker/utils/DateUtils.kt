@@ -54,3 +54,36 @@ fun formatUtcToLocalTime(utcTime: String, outputPattern: String = "HH:mm"): Stri
         "Invalid Date"
     }
 }
+
+fun convertToLong(dateString: String, timeString: String): Long {
+    try {
+        // Create a SimpleDateFormat for the date and time
+        val dateFormatter = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+        // Parse the date and time strings into Date objects
+        val date = dateFormatter.parse(dateString)
+        val time = timeFormatter.parse(timeString)
+
+        if (date != null && time != null) {
+            // Use Calendar to combine the date and time into a single timestamp
+            val calendar = Calendar.getInstance()
+            calendar.time = date // Set the base date
+            val timeCalendar = Calendar.getInstance()
+            timeCalendar.time = time // Set the time
+
+            // Apply hours and minutes from time to the base date
+            calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY))
+            calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE))
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+
+            // Return the time in milliseconds
+            return calendar.timeInMillis
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    // Return -1 if parsing failed
+    return System.currentTimeMillis()
+}

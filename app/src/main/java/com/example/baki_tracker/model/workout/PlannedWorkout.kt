@@ -7,5 +7,6 @@ data class PlannedWorkout(
     val date: String,
     val startTime: String,
     val endTime: String,
-    val calendarId: String
+    val calendarId: String,
+    val description: String
 )
