@@ -33,7 +33,7 @@ import com.example.baki_tracker.model.workout.WorkoutType
 fun OptionsScreen(
     elementName: String,
     name: String,
-    exerciseNumber: Int,
+    description: String,
     workoutType: WorkoutType? = null,
     date: String? = null,
     onEditClick: () -> Unit,
@@ -42,7 +42,7 @@ fun OptionsScreen(
     Column {
         //Header
 
-        OptionsHeader(name, exerciseNumber, workoutType, date)
+        OptionsHeader(name, description, workoutType, date)
         Spacer(Modifier.height(16.dp))
         HorizontalDivider()
         //Body
@@ -72,7 +72,7 @@ fun OptionsItem(icon: ImageVector, label: String, onClick: () -> Unit) {
 
 @Composable
 fun OptionsHeader(
-    name: String, exerciseNumber: Int, workoutType: WorkoutType? = null, date: String?
+    name: String, description: String, workoutType: WorkoutType? = null, date: String?
 ) {
     Column(
         Modifier
@@ -90,7 +90,7 @@ fun OptionsHeader(
                 Text("-", modifier = Modifier.padding(horizontal = 8.dp))
             }
 
-            Text("$exerciseNumber ${stringResource(R.string.exercises)}")
+            Text(description)
 
             date?.let {
                 Text("-", modifier = Modifier.padding(horizontal = 8.dp))
@@ -103,7 +103,7 @@ fun OptionsHeader(
 @Preview(showBackground = true)
 @Composable
 fun OptionsScreenPreview() {
-    OptionsScreen("Workout", "Abs", 8, WorkoutType.Gym, "12.12.2012", {}, {})
+    OptionsScreen("Workout", "Abs", "5 Exercises", WorkoutType.Gym, "12.12.2012", {}, {})
 }
 
 @Preview

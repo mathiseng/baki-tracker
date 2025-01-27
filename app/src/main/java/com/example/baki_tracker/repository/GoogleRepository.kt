@@ -57,7 +57,8 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
     private val storageName = context.packageName + "_preferences"
 
     //Save Credentials in DataStore
-    private val Context.dataStore by preferencesDataStore(
+    private val Context.dataStore by
+    preferencesDataStore(
         name = storageName,
         produceMigrations = { context ->
             listOf(SharedPreferencesMigration(context, storageName))
@@ -113,8 +114,8 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
         val calendarId = getWorkoutCalendarId()
         val url = "https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events"
 
-        val jsonBody =
-            "{\n" + "  \"end\": {\n" + "    \"dateTime\": \"${endTime}\",\n" + "    \"timeZone\": \"Europe/Berlin\"\n" + "    \n" + "  },\n" + "  \"start\": {\n" + "    \"dateTime\": \"${startTime}\",\n" + "    \"timeZone\": \"Europe/Berlin\"\n" + "    \n" + "  },\n" + "  \"summary\": \"${workout.name}\",\n" + "  \"description\": \"${workout.exercises.size} Exercises\",\n" + "  \"extendedProperties\": {\n" + "    \"private\": {\n" + "      \"workoutId\": \"${workout.uuid}\"\n" + "      \n" + "    }\n" + "    \n" + "  }\n" + "  \n" + "}"
+        val jsonBody = getEventJson(startTime, endTime, workout)
+
         withContext(Dispatchers.IO) {
             val response = makeApiRequest(url, "POST", jsonBody)
             if (response != null && response.isSuccessful) {
@@ -124,35 +125,81 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
         }
     }
 
-    override suspend fun deleteCalendarEvent() {
-        val calendarId = ""
-        val eventId = ""
+    override suspend fun deleteCalendarEvent(eventId: String) {
+        val calendarId = getWorkoutCalendarId()
+
         val url = "https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}"
+
+        withContext(Dispatchers.IO) {
+            val response = makeApiRequest(url, "DELETE")
+
+            if (response != null && response.isSuccessful) {
+                getCalendarEvents()
+            }
+        }
     }
 
-    override suspend fun updateCalendarEvent() {
-        val calendarId = ""
-        val eventId = ""
+    override suspend fun updateCalendarEvent(
+        eventId: String,
+        startTime: String,
+        endTime: String,
+        workout: Workout
+    ) {
+        val calendarId = getWorkoutCalendarId()
         val url = "https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${eventId}"
+
+        val jsonBody = getEventJson(startTime, endTime, workout)
+        withContext(Dispatchers.IO) {
+            val response = makeApiRequest(url, "PATCH", jsonBody)
+
+            if (response != null && response.isSuccessful) {
+                getCalendarEvents()
+            }
+        }
     }
 
 
     //============= Helper Functions for API Calls =========================
 
+    private fun getEventJson(startTime: String, endTime: String, workout: Workout): String {
+        return "{\n" +
+                "  \"end\": {\n" +
+                "    \"dateTime\": \"${endTime}\",\n" +
+                "    \"timeZone\": \"Europe/Berlin\"\n" +
+                "    \n" +
+                "  },\n" +
+                "  \"start\": {\n" +
+                "    \"dateTime\": \"${startTime}\",\n" +
+                "    \"timeZone\": \"Europe/Berlin\"\n" +
+                "    \n" +
+                "  },\n" +
+                "  \"summary\": \"${workout.name}\",\n" +
+                "  \"description\": \"${workout.exercises.size} Exercises\",\n" +
+                "  \"extendedProperties\": {\n" +
+                "    \"private\": {\n" +
+                "      \"workoutId\": \"${workout.uuid}\"\n" +
+                "      \n" +
+                "    }\n" +
+                "    \n" +
+                "  }\n" +
+                "  \n" +
+                "}"
+    }
+
     @SuppressLint("NewApi")
     private fun deserializeEventToPlannedWorkout(
-        event: JSONObject, calendarId: String
+        event: JSONObject,
+        calendarId: String
     ): PlannedWorkout {
-//        val workoutId = event.getJSONObject("extendedProperties").getJSONObject("private")
-//            .getString("WorkoutId")
-        val workoutId = ""
+        val workoutId = event.getJSONObject("extendedProperties").getJSONObject("private")
+            .getString("workoutId")
         val eventId = event.getString("id")
         val title = event.getString("summary")
         val startTime = formatUtcToLocalTime(event.getJSONObject("start").getString("dateTime"))
         val endTime = formatUtcToLocalTime(event.getJSONObject("end").getString("dateTime"))
         val date =
             formatUtcToLocalTime(event.getJSONObject("start").getString("dateTime"), "dd.MM.yyyy")
-
+        val description = event.getString("description")
 
         return PlannedWorkout(
             eventId = eventId,
@@ -161,7 +208,8 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
             date = date,
             startTime = startTime,
             endTime = endTime,
-            calendarId = calendarId
+            calendarId = calendarId,
+            description = description
         )
     }
 
@@ -215,7 +263,9 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
 
 
     private suspend fun makeApiRequest(
-        url: String, method: String, body: String? = null
+        url: String,
+        method: String,
+        body: String? = null
     ): Response? {
         return withContext(Dispatchers.IO) {
             try {
@@ -223,15 +273,16 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
                 val client = OkHttpClient()
                 val accessToken = refreshAccessTokenIfNeeded()
 
-                val requestBuilder =
-                    Request.Builder().url(url).addHeader("Authorization", "Bearer $accessToken")
+                val requestBuilder = Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Bearer $accessToken")
 
                 if (method == "POST") {
                     val requestBody = body?.toRequestBody("application/json".toMediaType())
                     requestBuilder.post(requestBody!!)
-                } else if (method == "PUT") {
+                } else if (method == "PATCH") {
                     val requestBody = body?.toRequestBody("application/json".toMediaType())
-                    requestBuilder.put(requestBody!!)
+                    requestBuilder.patch(requestBody!!)
                 } else if (method == "DELETE") {
                     requestBuilder.delete()
                 }
@@ -264,7 +315,8 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
                         continuation.resumeWith(
                             Result.failure(
                                 Exception(
-                                    "Failed to refresh token", ex
+                                    "Failed to refresh token",
+                                    ex
                                 )
                             )
                         )
@@ -304,7 +356,8 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
     //============= Authorization & Token Handling Logic ===================
 
     override suspend fun onAuthCodeReceived(
-        authService: AuthorizationService, tokenRequest: TokenRequest
+        authService: AuthorizationService,
+        tokenRequest: TokenRequest
     ) {
         withContext(Dispatchers.IO) {
             try {
@@ -375,9 +428,14 @@ interface IGoogleRepository {
 
     suspend fun planCalendarEvent(startTime: String, endTime: String, workout: Workout)
 
-    suspend fun deleteCalendarEvent()
+    suspend fun deleteCalendarEvent(eventId: String)
 
-    suspend fun updateCalendarEvent()
+    suspend fun updateCalendarEvent(
+        eventId: String,
+        startTime: String,
+        endTime: String,
+        workout: Workout
+    )
 
     suspend fun signOut()
     fun getAuthRequest()

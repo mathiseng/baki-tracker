@@ -1,8 +1,10 @@
 package com.example.baki_tracker.workout.options
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.baki_tracker.R
+import com.example.baki_tracker.repository.IGoogleRepository
 import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
 import com.example.baki_tracker.workout.ISharedWorkoutStateRepository
 import com.example.baki_tracker.workout.WorkoutBottomSheet
@@ -16,7 +18,8 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class OptionsViewModel(
     private val sharedWorkoutStateRepository: ISharedWorkoutStateRepository,
-    val workoutDatabaseRepository: IWorkoutDatabaseRepository
+    val workoutDatabaseRepository: IWorkoutDatabaseRepository,
+    val googleRepository: IGoogleRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OptionsUiState.initialUiState())
@@ -34,6 +37,13 @@ class OptionsViewModel(
                 _uiState.update { it.copy(selectedWorkoutTrackingSession = session) }
             }
         }
+
+        viewModelScope.launch {
+            sharedWorkoutStateRepository.selectedPlannedWorkout.collect { plannedWorkout ->
+                _uiState.update { it.copy(selectedPlannedWorkout = plannedWorkout) }
+            }
+        }
+
     }
 
     fun onEditClick() {
@@ -48,6 +58,9 @@ class OptionsViewModel(
                 WorkoutBottomSheet.EDIT_TRACK
             )
 
+            uistate.selectedPlannedWorkout != null -> sharedWorkoutStateRepository.updateSelectedBottomSheet(
+                WorkoutBottomSheet.EDIT_PLANNED
+            )
         }
     }
 
@@ -75,6 +88,17 @@ class OptionsViewModel(
                     this::hideDeleteDialog
                 )
             )
+
+            uistate.selectedPlannedWorkout != null -> sharedWorkoutStateRepository.updateDialog(
+                DialogInfo(
+                    R.string.delete_planned_workout,
+                    R.string.delete_planned_workout_confirmation,
+                    R.string.delete,
+                    R.string.cancel,
+                    { onDeleteConfirmation(uuid) },
+                    this::hideDeleteDialog
+                )
+            )
         }
     }
 
@@ -85,6 +109,10 @@ class OptionsViewModel(
                 when {
                     uistate.selectedWorkout != null -> workoutDatabaseRepository.deleteWorkout(uuid)
                     uistate.selectedWorkoutTrackingSession != null -> workoutDatabaseRepository.deleteWorkoutTrackingSession(
+                        uuid
+                    )
+
+                    uistate.selectedPlannedWorkout != null -> googleRepository.deleteCalendarEvent(
                         uuid
                     )
                 }
@@ -99,10 +127,9 @@ class OptionsViewModel(
     }
 
     fun onDismiss() {
-        _uiState.update { OptionsUiState.initialUiState() }
-        sharedWorkoutStateRepository.dismissBottomSheet()
         sharedWorkoutStateRepository.updateSelectedWorkout(null)
         sharedWorkoutStateRepository.updateSelectedWorkoutTrackingSession(null)
         sharedWorkoutStateRepository.updateDialog(null)
+        sharedWorkoutStateRepository.dismissBottomSheet()
     }
 }

@@ -1,6 +1,7 @@
 package com.example.baki_tracker.workout
 
 import com.example.baki_tracker.dependencyInjection.Singleton
+import com.example.baki_tracker.model.workout.PlannedWorkout
 import com.example.baki_tracker.model.workout.Workout
 import com.example.baki_tracker.model.workout.WorkoutTrackingSession
 import com.example.baki_tracker.workout.components.DialogInfo
@@ -19,6 +20,9 @@ class SharedWorkoutStateRepository : ISharedWorkoutStateRepository {
         MutableStateFlow(null)
     override val selectedWorkoutTrackingSession = _selectedWorkoutTrackingSession.asStateFlow()
 
+    private val _selectedPlannedWorkout: MutableStateFlow<PlannedWorkout?> = MutableStateFlow(null)
+    override val selectedPlannedWorkout = _selectedPlannedWorkout.asStateFlow()
+
     private val _selectedBottomSheet: MutableStateFlow<WorkoutBottomSheet> =
         MutableStateFlow(WorkoutBottomSheet.NONE)
     override val selectedBottomSheet = _selectedBottomSheet.asStateFlow()
@@ -32,6 +36,10 @@ class SharedWorkoutStateRepository : ISharedWorkoutStateRepository {
 
     override fun updateSelectedWorkoutTrackingSession(session: WorkoutTrackingSession?) {
         _selectedWorkoutTrackingSession.value = session
+    }
+
+    override fun updateSelectedPlannedWorkout(plannedWorkout: PlannedWorkout?) {
+        _selectedPlannedWorkout.value = plannedWorkout
     }
 
     override fun updateSelectedBottomSheet(bottomSheet: WorkoutBottomSheet) {
@@ -50,16 +58,18 @@ class SharedWorkoutStateRepository : ISharedWorkoutStateRepository {
 interface ISharedWorkoutStateRepository {
     val selectedWorkout: StateFlow<Workout?>
     val selectedWorkoutTrackingSession: StateFlow<WorkoutTrackingSession?>
+    val selectedPlannedWorkout: StateFlow<PlannedWorkout?>
     val selectedBottomSheet: StateFlow<WorkoutBottomSheet>
     val dialog: StateFlow<DialogInfo?>
 
     fun updateSelectedWorkout(workout: Workout?)
     fun updateSelectedWorkoutTrackingSession(session: WorkoutTrackingSession?)
+    fun updateSelectedPlannedWorkout(plannedWorkout: PlannedWorkout?)
     fun updateSelectedBottomSheet(bottomSheet: WorkoutBottomSheet)
     fun updateDialog(dialogInfo: DialogInfo?)
     fun dismissBottomSheet()
 }
 
 enum class WorkoutBottomSheet {
-    NONE, ADD, EDIT, TRACK, TRACK_FREE, OPTIONS, TRACKING_OPTIONS, EDIT_TRACK
+    NONE, ADD, EDIT, TRACK, TRACK_FREE, OPTIONS, TRACKING_OPTIONS, EDIT_TRACK, EDIT_PLANNED, ADD_PLANNED
 }

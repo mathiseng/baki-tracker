@@ -32,26 +32,43 @@ fun OptionsContainer(optionsViewModel: () -> OptionsViewModel) {
         sheetState = sheetState
     ) {
 
-        if (uiState.selectedWorkout != null) {
-            val workout = uiState.selectedWorkout
-            OptionsScreen(
-                elementName = stringResource(R.string.workout),
-                name = workout!!.name,
-                exerciseNumber = workout.exercises.size,
-                workoutType = workout.workoutType,
-                onEditClick = viewModel::onEditClick,
-                onDeleteClick = { viewModel.onDeleteClick(workout.uuid) },
-            )
-        } else if (uiState.selectedWorkoutTrackingSession != null) {
-            val session = uiState.selectedWorkoutTrackingSession
-            OptionsScreen(
-                elementName = stringResource(R.string.workout_tracking),
-                name = session!!.name,
-                exerciseNumber = session.trackedExercises.size,
-                onEditClick = viewModel::onEditClick,
-                onDeleteClick = { viewModel.onDeleteClick(session.uuid) },
-                date = session.date.formatTimestampToString()
-            )
+        when {
+            uiState.selectedWorkout != null -> {
+                val workout = uiState.selectedWorkout
+                OptionsScreen(
+                    elementName = stringResource(R.string.workout),
+                    name = workout!!.name,
+                    description = "${workout.exercises.size} ${stringResource(R.string.exercises)}",
+                    workoutType = workout.workoutType,
+                    onEditClick = viewModel::onEditClick,
+                    onDeleteClick = { viewModel.onDeleteClick(workout.uuid) },
+                )
+            }
+
+            uiState.selectedWorkoutTrackingSession != null -> {
+                val session = uiState.selectedWorkoutTrackingSession
+                OptionsScreen(
+                    elementName = stringResource(R.string.workout_tracking),
+                    name = session!!.name,
+                    description = "${session.trackedExercises.size} ${stringResource(R.string.exercises)}",
+                    onEditClick = viewModel::onEditClick,
+                    onDeleteClick = { viewModel.onDeleteClick(session.uuid) },
+                    date = session.date.formatTimestampToString()
+                )
+            }
+
+            uiState.selectedPlannedWorkout != null -> {
+                val plannedWorkout = uiState.selectedPlannedWorkout
+                OptionsScreen(
+                    elementName = stringResource(R.string.workout_planned),
+                    name = plannedWorkout!!.title,
+                    description = plannedWorkout.description,
+                    onEditClick = viewModel::onEditClick,
+                    onDeleteClick = { viewModel.onDeleteClick(plannedWorkout.eventId) },
+                    date = plannedWorkout.date
+                )
+
+            }
         }
     }
 }

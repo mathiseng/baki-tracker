@@ -36,8 +36,12 @@
     <string name="delete_workout_confirmation">Bist du sicher, dass du dieses Workout löschen möchtest? Diese Atkion kann nicht rückgängig gemacht werden.</string>
     <string name="delete_workout_session">Workout Aufzeichnung Löschen</string>
     <string name="delete_workout_session_confirmation">Bist du sicher, dass du diese Workout Aufzeichnung löschen möchtest? Diese Atkion kann nicht rückgängig gemacht werden.</string>
+    <string name="delete_planned_workout">Geplantes Workout Löschen</string>
+    <string name="delete_planned_workout_confirmation">Bist du sicher, dass du dieses geplante Workout im Kalender löschen möchtest? Diese Atkion kann nicht rückgängig gemacht werden.</string>
+
     <string name="track_workout">Workout Aufzeichnen</string>
     <string name="workout_tracking">Workout Aufzeichnung</string>
+    <string name="workout_planned">Geplantes Workout</string>
     <string name="planned">Geplant</string>
     <string name="start">Start</string>
     <string name="next">Weiter</string>

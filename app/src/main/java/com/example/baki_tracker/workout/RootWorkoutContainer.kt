@@ -37,8 +37,10 @@ fun RootWorkoutContainer(workoutDependencyProvider: WorkoutDependencyProvider) {
     if (uiState.selectedBottomSheet != WorkoutBottomSheet.NONE) {
         when (uiState.selectedBottomSheet) {
             WorkoutBottomSheet.ADD -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.CREATE)
+            WorkoutBottomSheet.ADD_PLANNED ->workoutDependencyProvider.planBottomSheet(false)
             WorkoutBottomSheet.EDIT -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.EDIT)
             WorkoutBottomSheet.EDIT_TRACK -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.EDIT_TRACK)
+            WorkoutBottomSheet.EDIT_PLANNED -> workoutDependencyProvider.planBottomSheet(true)
             WorkoutBottomSheet.TRACK -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.TRACK)
             WorkoutBottomSheet.TRACK_FREE -> workoutDependencyProvider.manageWorkoutContainer(ManageWorkoutMode.TRACK_FREE)
             WorkoutBottomSheet.OPTIONS -> workoutDependencyProvider.optionsContainer()
