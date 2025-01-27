@@ -217,7 +217,9 @@ class ManageWorkoutViewModel(
     }
 
     fun onDismiss() {
+        _uiState.update { ManageWorkoutUiState.initialUiState() }
         sharedWorkoutStateRepository.dismissBottomSheet()
         sharedWorkoutStateRepository.updateSelectedWorkout(null)
+        sharedWorkoutStateRepository.updateSelectedWorkoutTrackingSession(null)
     }
 }
