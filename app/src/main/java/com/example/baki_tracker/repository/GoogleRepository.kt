@@ -307,32 +307,38 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
                     "Token needs refresh. Attempting to refresh...${googleAuthState.authorizationServiceConfiguration!!.toJson()}"
                 )
 
-                googleAuthState.performActionWithFreshTokens(authService) { accessToken, idToken, ex ->
-                    Log.e("TESTII RESULT REFRESH", "Token ${accessToken} Exception ${ex}")
+                googleAuthState.refreshToken?.let {
 
-                    if (ex != null) {
-                        Log.e("TOKEN_REFRESH", "Failed to refresh token: ${ex.localizedMessage}")
-                        continuation.resumeWith(
-                            Result.failure(
-                                Exception(
-                                    "Failed to refresh token",
-                                    ex
+                    val tokenRequest = AppAuth.getRefreshTokenRequest(it)
+                    authService.performTokenRequest(tokenRequest) { response, exception ->
+
+                        Log.e("TESTII RESULT REFRESH", "Token ${response?.accessToken} Exception ${exception}")
+
+                        if (exception != null) {
+                            Log.e("TOKEN_REFRESH", "Failed to refresh token: ${exception.localizedMessage}")
+                            continuation.resumeWith(
+                                Result.failure(
+                                    Exception(
+                                        "Failed to refresh token",
+                                        exception
+                                    )
                                 )
                             )
-                        )
-                    } else if (accessToken != null) {
-                        Log.d("TOKEN_REFRESH", "Token refreshed successfully: $accessToken")
+                        } else if (response?.accessToken != null) {
+                            Log.d("TOKEN_REFRESH", "Token refreshed successfully: ${response.accessToken}")
 
-                        // Save the updated auth state to DataStore
-                        repositoryScope.launch {
-                            saveTokenResult(googleAuthState)
+                            // Save the updated auth state to DataStore
+                            repositoryScope.launch {
+                                googleAuthState.update(response,null)
+                                saveTokenResult(googleAuthState)
+                            }
+
+                            // Resume the coroutine with the fresh access token
+                            continuation.resume(response.accessToken!!)
+                        } else {
+                            Log.e("TOKEN_REFRESH", "Access token is null after refresh attempt.")
+                            continuation.resumeWith(Result.failure(Exception("Access token is null")))
                         }
-
-                        // Resume the coroutine with the fresh access token
-                        continuation.resume(accessToken)
-                    } else {
-                        Log.e("TOKEN_REFRESH", "Access token is null after refresh attempt.")
-                        continuation.resumeWith(Result.failure(Exception("Access token is null")))
                     }
                 }
             } else {
@@ -415,7 +421,6 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
         _authState.update { GoogleAuthState.Loading }
         val request = AppAuth.getAuthRequest()
         _authorizationRequest.value = request
-
     }
 }
 
