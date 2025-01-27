@@ -12,5 +12,5 @@ enum class WorkoutTabDestinations(
 ) : TabDestination {
     TRACKING(R.string.tracking, WorkoutScreens.TrackingScreen),
     WORKOUTS(R.string.workouts, WorkoutScreens.WorkoutsScreen),
-    EXERCISES(R.string.exercises, WorkoutScreens.ExercisesScreen),
+    PLANNING(R.string.schedule, WorkoutScreens.ScheduleScreen),
 }

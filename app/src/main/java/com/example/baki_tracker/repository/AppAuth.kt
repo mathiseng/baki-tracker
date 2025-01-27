@@ -1,9 +1,7 @@
 package com.example.baki_tracker.repository
 
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
-import kotlinx.serialization.Serializable
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
@@ -88,7 +86,7 @@ object AppAuth {
 
     object AuthConfig {
         const val AUTH_URI = "https://accounts.google.com/o/oauth2/v2/auth"
-        const val TOKEN_URI = "https://www.googleapis.com/oauth2/v4/token"
+        const val TOKEN_URI = "https://oauth2.googleapis.com/token"
         const val END_SESSION_URI = "" // to be defined
         const val RESPONSE_TYPE = ResponseTypeValues.CODE
         const val SCOPE = "https://www.googleapis.com/auth/calendar"
