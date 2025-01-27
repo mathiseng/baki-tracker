@@ -7,11 +7,9 @@ import com.example.baki_tracker.repository.AuthRepository
 import com.example.baki_tracker.repository.GoogleRepository
 import com.example.baki_tracker.repository.IAuthRepository
 import com.example.baki_tracker.repository.IGoogleRepository
-import com.example.baki_tracker.repository.INutritionDatabaseRepository
 import com.example.baki_tracker.repository.INutritionRepository
 import com.example.baki_tracker.repository.IUserProfileRepository
 import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
-import com.example.baki_tracker.repository.NutritionDatabaseRepository
 import com.example.baki_tracker.repository.NutritionRepository
 import com.example.baki_tracker.repository.UserProfileRepository
 import com.example.baki_tracker.repository.WorkoutDatabaseRepository
@@ -44,9 +42,6 @@ abstract class MainActivityComponent(@Component val parent: ApplicationComponent
 
     @get:Provides
     val workoutDatabaseRepository: IWorkoutDatabaseRepository = WorkoutDatabaseRepository()
-
-    @get:Provides
-    val nutritionDatabaseRepository: INutritionDatabaseRepository = NutritionDatabaseRepository()
 
     @get:Provides
     val userProfileRepository: IUserProfileRepository = UserProfileRepository()

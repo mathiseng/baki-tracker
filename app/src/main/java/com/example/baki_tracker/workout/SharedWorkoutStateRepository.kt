@@ -8,6 +8,7 @@ import com.example.baki_tracker.workout.components.DialogInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -43,7 +44,7 @@ class SharedWorkoutStateRepository : ISharedWorkoutStateRepository {
     }
 
     override fun updateSelectedBottomSheet(bottomSheet: WorkoutBottomSheet) {
-        _selectedBottomSheet.value = bottomSheet
+        _selectedBottomSheet.update { bottomSheet }
     }
 
     override fun updateDialog(dialogInfo: DialogInfo?) {
@@ -51,7 +52,7 @@ class SharedWorkoutStateRepository : ISharedWorkoutStateRepository {
     }
 
     override fun dismissBottomSheet() {
-        _selectedBottomSheet.value = WorkoutBottomSheet.NONE
+        _selectedBottomSheet.update { WorkoutBottomSheet.NONE }
     }
 }
 
