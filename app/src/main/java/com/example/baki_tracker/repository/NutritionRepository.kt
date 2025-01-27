@@ -1,6 +1,7 @@
 package com.example.baki_tracker.repository
 
 import android.util.Log
+import com.example.baki_tracker.BuildConfig
 import com.example.baki_tracker.dependencyInjection.Singleton
 import com.example.baki_tracker.model.nutrition.FoodItem
 import com.example.baki_tracker.model.nutrition.NutritionTrackingDay
@@ -253,7 +254,7 @@ class NutritionRepository : INutritionRepository {
         _nutritionRequestState.update { NutritionRequestState.Loading }
 
         // USDA API key
-        val apiKey = "noiZQKV79NVmuqWW4g1biJuR6U45D3JtrXzDTf3V" // Replace with your actual API key
+        val apiKey = BuildConfig.USDA_NUTRITION_KEY // Replace with your actual API key
 
         val cleanedQuery = query.trim().lowercase().replace(Regex("[^a-z ]"), "")
         val url = "https://api.nal.usda.gov/fdc/v1/foods/search?query=$cleanedQuery&api_key=$apiKey"
