@@ -2,9 +2,9 @@ package com.example.baki_tracker.workout.planning
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.baki_tracker.dependencyInjection.Singleton
 import com.example.baki_tracker.model.workout.PlannedWorkout
 import com.example.baki_tracker.model.workout.Workout
+import com.example.baki_tracker.repository.GoogleAuthState
 import com.example.baki_tracker.repository.IGoogleRepository
 import com.example.baki_tracker.repository.IWorkoutDatabaseRepository
 import com.example.baki_tracker.utils.formatDateToUTC
@@ -31,12 +31,16 @@ class PlanningViewModel(
 
     init {
         viewModelScope.launch {
-            googleRepository.getCalendarEvents()
-        }
-
-        viewModelScope.launch {
             googleRepository.plannedWorkouts.collect { list ->
                 _uiState.update { it.copy(plannedMap = groupPlannedWorkoutsByDate(list)) }
+
+            }
+        }
+
+
+        viewModelScope.launch {
+            googleRepository.authState.collect { authState ->
+                _uiState.update { it.copy(isAuthenticated = authState == GoogleAuthState.Authenticated) }
 
             }
         }
@@ -51,6 +55,13 @@ class PlanningViewModel(
             sharedWorkoutStateRepository.selectedPlannedWorkout.collect { plannedWorkout ->
                 _uiState.update { it.copy(selectedPlannedWorkout = plannedWorkout) }
             }
+        }
+    }
+
+
+    fun refreshCalendarEvents() {
+        viewModelScope.launch {
+            googleRepository.getCalendarEvents()
         }
     }
 
@@ -115,6 +126,12 @@ class PlanningViewModel(
         val workout = uiState.value.workoutList.firstOrNull() { it.uuid == workoutId }
         workout?.let {
             sharedWorkoutStateRepository.updateSelectedWorkout(it)
+        }
+    }
+
+    fun onSignUpWithGoogle() {
+        viewModelScope.launch {
+            googleRepository.getAuthRequest()
         }
     }
 }
