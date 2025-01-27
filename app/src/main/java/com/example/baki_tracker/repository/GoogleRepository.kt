@@ -37,6 +37,16 @@ import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+private val storageName = "com.example.baki_tracker" + "_preferences"
+
+//Define Datastore and save Credentials and calendarId in DataStore
+private val Context.dataStore by
+preferencesDataStore(
+    name = storageName,
+    produceMigrations = { context ->
+        listOf(SharedPreferencesMigration(context, storageName))
+    },
+)
 
 @Inject
 @Singleton
@@ -53,19 +63,6 @@ class GoogleRepository(val context: Context) : IGoogleRepository {
     private val _plannedWorkouts: MutableStateFlow<List<PlannedWorkout>> =
         MutableStateFlow(emptyList())
     override val plannedWorkouts: Flow<List<PlannedWorkout>> = _plannedWorkouts
-
-    private val storageName = context.packageName + "_preferences"
-
-    //Save Credentials in DataStore
-    private val Context.dataStore by
-    preferencesDataStore(
-        name = storageName,
-        produceMigrations = { context ->
-            listOf(SharedPreferencesMigration(context, storageName))
-        },
-    )
-
-    //val client = OkHttpClient.Builder().build()
 
     private var googleAuthState: AuthState = AuthState(AppAuth.serviceConfiguration)
 
