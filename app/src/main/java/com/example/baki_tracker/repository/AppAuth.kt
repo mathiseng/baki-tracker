@@ -42,7 +42,14 @@ object AppAuth {
         return TokenRequest.Builder(
             serviceConfiguration, AuthConfig.CLIENT_ID
         ).setGrantType(GrantTypeValues.REFRESH_TOKEN).setScopes(AuthConfig.SCOPE)
-            .setRefreshToken(refreshToken).build()
+            .setRefreshToken(refreshToken)
+            .setAdditionalParameters(
+                mapOf(
+                    "client_secret" to AuthConfig.CLIENT_SECRET,
+                    "access_type" to "offline"
+                ) // Add the client_secret here
+            )
+            .build()
     }
 
     suspend fun performTokenRequestSuspend(
