@@ -22,8 +22,8 @@ fun WorkoutNavGraph(
         composable<WorkoutScreens.WorkoutsScreen> {
             workoutDependencyProvider.workoutsScreen()
         }
-        composable<WorkoutScreens.ExercisesScreen> {
-            Text("Exercises")
+        composable<WorkoutScreens.ScheduleScreen> {
+            workoutDependencyProvider.planningScreen()
         }
     }
 }
@@ -37,4 +37,7 @@ sealed class WorkoutScreens {
 
     @Serializable
     object ExercisesScreen
+
+    @Serializable
+    object ScheduleScreen
 }

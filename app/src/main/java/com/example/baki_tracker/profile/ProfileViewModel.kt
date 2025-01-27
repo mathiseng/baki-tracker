@@ -47,7 +47,7 @@ class ProfileViewModel(
 
     fun test() {
         viewModelScope.launch {
-          //  googleRepository.makeApiCall()
+            googleRepository.getCalendarEvents()
         }
     }
 }

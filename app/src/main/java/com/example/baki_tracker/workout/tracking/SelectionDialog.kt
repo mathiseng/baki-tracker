@@ -93,6 +93,7 @@ fun SelectionDialog(
                 )
             } else {
                 PredefinedWorkoutList(
+                    modifier = Modifier.fillMaxSize(),
                     workoutList = uiState.workoutList,
                     selectedWorkout = dialogState.selectedWorkout,
                     onChangeSelection = dialogState.setSelectedWorkout
@@ -138,13 +139,14 @@ private fun WorkoutModeSelection(
 }
 
 @Composable
-private fun PredefinedWorkoutList(
+fun PredefinedWorkoutList(
+    modifier: Modifier = Modifier,
     workoutList: List<Workout>, selectedWorkout: Workout?, onChangeSelection: (Workout) -> Unit
 ) {
     // State für das Scrollen
     val listState = rememberLazyListState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier) {
         // Die Workout-Liste
         LazyColumn(
             state = listState, // Scroll-State der LazyColumn
@@ -173,7 +175,7 @@ private fun PredefinedWorkoutList(
                         }
                     }
                 }
-                HorizontalDivider()
+                if (index < workoutList.lastIndex) HorizontalDivider()
             }
         }
     }
@@ -207,6 +209,9 @@ data class DialogState(
 @Preview(showBackground = true)
 @Composable
 fun PredefinedWorkoutListPreview() {
-    PredefinedWorkoutList(DummyData.workouts, null, {})
+    PredefinedWorkoutList(
+        workoutList = DummyData.workouts,
+        selectedWorkout = null,
+        onChangeSelection = {})
 
 }
