@@ -18,6 +18,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,6 +33,8 @@ import androidx.compose.ui.unit.sp
 import com.example.baki_tracker.R
 import com.example.baki_tracker.model.workout.WorkoutExercise
 import com.example.baki_tracker.model.workout.WorkoutSet
+import com.example.baki_tracker.utils.DecimalInputVisualTransformation
+import com.example.baki_tracker.utils.formatFloatingPoint
 import java.util.UUID
 
 @Composable
@@ -166,9 +172,15 @@ private fun SetRow(
     val showPlannedValues = (plannedSet != null)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(text = "Set $setNumber", fontSize = 22.sp, modifier = Modifier.padding(end = 8.dp))
+
+        var repsValue by remember { mutableStateOf(reps.toString()) }
         OutlinedTextField(
-            value = reps.toString(),
-            onValueChange = { onSetChange(exerciseId, setId, it.toIntOrNull() ?: 0, weight) },
+            value = repsValue,
+            onValueChange = {
+                repsValue = it
+                val newReps = repsValue.toIntOrNull() ?: 0
+                onSetChange(exerciseId, setId, newReps, weight)
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
             ),
@@ -183,10 +195,15 @@ private fun SetRow(
                 .padding(end = 8.dp),
         )
 
+        var value by remember { mutableStateOf(weight.toString()) }
         OutlinedTextField(
-            value = weight.toString(),
+            value = value,
+            visualTransformation = DecimalInputVisualTransformation(),
             onValueChange = {
-                onSetChange(exerciseId, setId, reps, it.toDoubleOrNull() ?: 0.0)
+                value = formatFloatingPoint(it)
+                val newDouble = value.replace(",", ".").toDoubleOrNull() ?: 0.0
+                onSetChange(exerciseId, setId, reps, newDouble)
+
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number, imeAction = ImeAction.Next

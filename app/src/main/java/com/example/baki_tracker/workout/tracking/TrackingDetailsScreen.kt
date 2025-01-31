@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.baki_tracker.R
-import com.example.baki_tracker.model.workout.TrackedWorkoutSet
 import com.example.baki_tracker.model.workout.Workout
 import com.example.baki_tracker.model.workout.WorkoutSet
 import com.example.baki_tracker.model.workout.WorkoutTrackingSession
