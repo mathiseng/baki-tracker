@@ -53,8 +53,9 @@ class TrackingViewModel(
     }
 
     private fun groupSessionsByDate(items: List<WorkoutTrackingSession>): Map<String, List<WorkoutTrackingSession>> {
-        return items.groupBy { it.date.formatTimestampToString() }
+        return items.groupBy { it.date }
             .toSortedMap(compareByDescending { it })
+            .mapKeys { entry -> entry.key.formatTimestampToString() }
     }
 
     fun onTrackWorkout() {
